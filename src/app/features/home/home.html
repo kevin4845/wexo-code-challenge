@@ -1,0 +1,126 @@
+<div class="page">
+  @if (configured && featured.isLoading()) {
+    <div class="hero-bleed">
+      <div class="hero skeleton" aria-hidden="true"></div>
+    </div>
+  } @else if (heroFilm(); as film) {
+    <!-- Backdrop is decorative: the title is the page heading. -->
+    <div class="hero-bleed">
+      <section class="hero rise">
+        @if (imageUrl(film.backdropPath, 'w1280'); as backdrop) {
+          <img class="hero__media" [src]="backdrop" alt="" />
+        }
+        <div class="hero__shade"></div>
+        <div class="hero__content">
+          <p class="eyebrow"><span class="accent-line" aria-hidden="true"></span> Featured film</p>
+          <h1>{{ film.title }}</h1>
+          <p class="meta">
+            @if (film.releaseYear) {
+              <span>{{ film.releaseYear }}</span>
+            }
+            @for (genre of film.genreNames; track genre) {
+              <span class="pill">{{ genre }}</span>
+            }
+            @if (formatVote(film.voteAverage); as rating) {
+              <span class="rating">{{ rating }}</span>
+            }
+          </p>
+          @if (film.overview) {
+            <p class="hero__overview">{{ film.overview }}</p>
+          }
+          <div class="hero__actions">
+            <a class="btn btn-primary" [routerLink]="['/movies', film.id]">
+              <app-icon name="play" />
+              Explore movie
+            </a>
+            <button type="button" class="btn btn-ghost" (click)="toggleFeatured(film)">
+              <app-icon [name]="isSaved(film.id) ? 'heart-filled' : 'heart'" />
+              {{ isSaved(film.id) ? 'On wishlist' : 'Add to wishlist' }}
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  }
+
+  <div class="wrap">
+    @if (configured && featured.error() && !heroFilm()) {
+      <section class="state" role="alert">
+        <h1>The featured film didn’t load</h1>
+        <p>{{ errorCopy(featured.error()) }}</p>
+        <button type="button" class="btn btn-primary" (click)="featured.reload()">Try again</button>
+      </section>
+    }
+
+    <section class="section" aria-labelledby="popular-genres">
+      <div class="section__heading">
+        <div>
+          <h2 id="popular-genres">Popular genres</h2>
+          <p>Discover movies from different genres</p>
+        </div>
+        <a class="text-link" routerLink="/genres">
+          View all genres
+          <app-icon name="arrow" />
+        </a>
+      </div>
+      <div class="scroller">
+        @for (row of rows; track row.genre.id) {
+          @if (configured && row.catalog.isLoading()) {
+            <div class="genre-card skeleton" aria-hidden="true"></div>
+          } @else {
+            <app-genre-card
+              [genreId]="row.genre.id"
+              [name]="row.genre.name"
+              [imageUrl]="
+                rowImage(row.genre.id, row.catalog.hasValue() ? row.catalog.value() : undefined)
+              "
+              [count]="rowCount(row.catalog.hasValue() ? row.catalog.value() : undefined)"
+            />
+          }
+        }
+      </div>
+    </section>
+
+    @for (row of rows; track row.genre.id) {
+      <section class="section" [attr.aria-labelledby]="'genre-' + row.genre.id">
+        <div class="section__heading">
+          <div>
+            <h2 [id]="'genre-' + row.genre.id">{{ row.genre.name }}</h2>
+            <p>{{ row.genre.description }}</p>
+          </div>
+          <a class="text-link" [routerLink]="['/genres', row.genre.id]">
+            View all
+            <app-icon name="arrow" />
+          </a>
+        </div>
+
+        @if (configured && row.catalog.isLoading()) {
+          <div class="scroller" aria-hidden="true">
+            @for (slot of [1, 2, 3, 4, 5, 6]; track slot) {
+              <div class="card-skeleton skeleton"></div>
+            }
+          </div>
+        } @else if (configured && row.catalog.error()) {
+          <p class="inline-error" role="alert">{{ errorCopy(row.catalog.error()) }}</p>
+        } @else if (
+          rowMovies(row.genre.id, row.catalog.hasValue() ? row.catalog.value() : undefined)
+            .length === 0
+        ) {
+          <p class="inline-error">No films in this genre right now.</p>
+        } @else {
+          <div class="scroller">
+            @for (
+              movie of rowMovies(
+                row.genre.id,
+                row.catalog.hasValue() ? row.catalog.value() : undefined
+              );
+              track movie.id
+            ) {
+              <app-movie-card [movie]="movie" />
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</div>

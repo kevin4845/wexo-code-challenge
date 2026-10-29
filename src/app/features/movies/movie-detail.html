@@ -1,0 +1,221 @@
+<div class="wrap page">
+  @if (configured && movie.isLoading() && !shownFilm()) {
+    <div class="detail-hero skeleton" aria-hidden="true"></div>
+  } @else if (shownFilm(); as film) {
+    <article class="detail">
+      <header class="detail-hero">
+        @if (imageUrl(film.backdropPath, 'w1280'); as backdrop) {
+          <img class="detail-hero__media" [src]="backdrop" alt="" />
+        }
+        <div class="detail-hero__shade"></div>
+        <div class="detail-hero__layout">
+          <div class="detail-hero__poster">
+            @if (imageUrl(film.posterPath, 'w342'); as poster) {
+              <img [src]="poster" [alt]="film.title + ' poster'" width="342" height="513" />
+            } @else {
+              <span class="card__fallback">{{ film.title }}</span>
+            }
+          </div>
+          <div class="detail-hero__copy">
+            <h1>{{ film.title }}</h1>
+            <p class="meta">
+              @if (film.releaseYear) {
+                <span>{{ film.releaseYear }}</span>
+              }
+              @if (formatRuntime(film.runtime); as runtime) {
+                <span>{{ runtime }}</span>
+              }
+              @if (formatVote(film.voteAverage); as rating) {
+                <span class="rating">{{ rating }}</span>
+              }
+            </p>
+            @if (film.genres.length > 0) {
+              <p class="meta">
+                @for (genre of film.genres; track genre.id) {
+                  <a class="pill" [routerLink]="['/genres', genre.id]">{{ genre.name }}</a>
+                }
+              </p>
+            }
+            @if (film.tagline) {
+              <p class="tagline">{{ film.tagline }}</p>
+            }
+            @if (film.overview) {
+              <p class="detail-hero__overview">{{ film.overview }}</p>
+            }
+            <div class="hero__actions">
+              <button type="button" class="btn btn-primary" (click)="toggle(film)">
+                <app-icon [name]="isSaved(film.id) ? 'heart-filled' : 'heart'" />
+                {{ isSaved(film.id) ? 'On wishlist' : 'Add to wishlist' }}
+              </button>
+              @if (trailerHref(); as href) {
+                <a class="btn btn-ghost" [href]="href" target="_blank" rel="noopener noreferrer">
+                  <app-icon name="play" />
+                  Watch trailer
+                </a>
+              }
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="tabs" role="tablist" aria-label="Film sections">
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="tab() === 'overview'"
+          [class.is-active]="tab() === 'overview'"
+          (click)="selectTab('overview')"
+        >
+          Overview
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="tab() === 'cast'"
+          [class.is-active]="tab() === 'cast'"
+          (click)="selectTab('cast')"
+        >
+          Cast &amp; Crew
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="tab() === 'similar'"
+          [class.is-active]="tab() === 'similar'"
+          (click)="selectTab('similar')"
+        >
+          Similar movies
+        </button>
+      </div>
+
+      @if (tab() === 'overview') {
+        <div class="overview-layout" role="tabpanel">
+          <section aria-labelledby="cast-heading">
+            <h2 id="cast-heading">Cast &amp; Crew</h2>
+            @if (!usingPreview() && credits.isLoading()) {
+              <div class="cast-row" aria-hidden="true">
+                @for (slot of [1, 2, 3, 4, 5]; track slot) {
+                  <div class="portrait-skeleton skeleton"></div>
+                }
+              </div>
+            } @else if (creditCast(10).length === 0) {
+              <p class="inline-error">Cast information isn’t available for this film.</p>
+            } @else {
+              <div class="cast-row">
+                @for (person of creditCast(10); track person.id) {
+                  <figure class="person">
+                    @if (portraitUrl(person.profilePath); as src) {
+                      <img
+                        [src]="src"
+                        [alt]="person.name"
+                        width="185"
+                        height="185"
+                        loading="lazy"
+                      />
+                    } @else {
+                      <span class="person__fallback" aria-hidden="true">{{
+                        person.name.slice(0, 1)
+                      }}</span>
+                    }
+                    <figcaption>
+                      <span>{{ person.name }}</span>
+                      <span>{{ person.character }}</span>
+                    </figcaption>
+                  </figure>
+                }
+              </div>
+            }
+          </section>
+          <dl class="facts">
+            @if (directorName(); as director) {
+              <div>
+                <dt>Director</dt>
+                <dd>{{ director }}</dd>
+              </div>
+            }
+            @if (writerNames(); as writers) {
+              <div>
+                <dt>Writer</dt>
+                <dd>{{ writers }}</dd>
+              </div>
+            }
+            @if (formatReleaseDate(film.releaseDate); as released) {
+              <div>
+                <dt>Release date</dt>
+                <dd>{{ released }}</dd>
+              </div>
+            }
+            @if (formatRuntime(film.runtime); as runtime) {
+              <div>
+                <dt>Runtime</dt>
+                <dd>{{ runtime }}</dd>
+              </div>
+            }
+            @if (film.genres.length > 0) {
+              <div>
+                <dt>Genres</dt>
+                <dd>{{ genreLabel(film) }}</dd>
+              </div>
+            }
+            @if (languageName(film.originalLanguage); as language) {
+              <div>
+                <dt>Language</dt>
+                <dd>{{ language }}</dd>
+              </div>
+            }
+          </dl>
+        </div>
+      } @else if (tab() === 'cast') {
+        <section class="cast-grid" role="tabpanel" aria-labelledby="full-cast">
+          <h2 id="full-cast" class="sr-only">Cast and crew</h2>
+          @for (person of creditCast(18); track person.id) {
+            <figure class="person">
+              @if (portraitUrl(person.profilePath); as src) {
+                <img [src]="src" [alt]="person.name" width="185" height="185" loading="lazy" />
+              } @else {
+                <span class="person__fallback" aria-hidden="true">{{
+                  person.name.slice(0, 1)
+                }}</span>
+              }
+              <figcaption>
+                <span>{{ person.name }}</span>
+                <span>{{ person.character }}</span>
+              </figcaption>
+            </figure>
+          }
+        </section>
+      } @else {
+        <section role="tabpanel" aria-labelledby="similar-heading">
+          <h2 id="similar-heading" class="sr-only">Similar movies</h2>
+          @if (!usingPreview() && similar.isLoading()) {
+            <div class="movie-grid" aria-hidden="true">
+              @for (slot of [1, 2, 3, 4, 5, 6]; track slot) {
+                <div class="card-skeleton skeleton"></div>
+              }
+            </div>
+          } @else if (similarFilms().length === 0) {
+            <p class="inline-error">No similar films were returned for this title.</p>
+          } @else {
+            <div class="movie-grid">
+              @for (related of similarFilms(); track related.id) {
+                <app-movie-card [movie]="related" />
+              }
+            </div>
+          }
+        </section>
+      }
+    </article>
+  } @else if (configured && movie.error()) {
+    <section class="state" role="alert">
+      <h1>This film couldn’t be opened</h1>
+      <p>{{ errorCopy(movie.error()) }}</p>
+      <button type="button" class="btn btn-primary" (click)="movie.reload()">Try again</button>
+    </section>
+  } @else {
+    <section class="state">
+      <h1>This film isn’t in the current selection</h1>
+      <p>Choose another title from the homepage.</p>
+      <a class="btn btn-primary" routerLink="/">Browse movies</a>
+    </section>
+  }
+</div>

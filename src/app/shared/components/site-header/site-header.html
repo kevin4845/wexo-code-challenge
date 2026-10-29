@@ -1,0 +1,76 @@
+<header class="header">
+  <div class="wrap header__bar">
+    <a class="wordmark" routerLink="/">FRAME</a>
+
+    <nav class="header__nav" aria-label="Primary">
+      <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="exactLink">Home</a>
+      <a routerLink="/genres" routerLinkActive="is-active">Genres</a>
+    </nav>
+
+    <form class="search" role="search" (submit)="submitSearch($event)">
+      <label class="sr-only" for="site-search">Search for movies</label>
+      <app-icon name="search" />
+      <input
+        id="site-search"
+        type="search"
+        name="q"
+        placeholder="Search for movies..."
+        [value]="query()"
+        (input)="onQuery($event)"
+      />
+    </form>
+
+    <div class="header__tools">
+      <button
+        type="button"
+        class="icon-button header__search-toggle"
+        [attr.aria-expanded]="searchOpen()"
+        aria-controls="mobile-search"
+        (click)="toggleSearch()"
+      >
+        <app-icon name="search" />
+        <span class="sr-only">Search</span>
+      </button>
+      <a class="wishlist-link" routerLink="/wishlist" routerLinkActive="is-active">
+        <app-icon name="heart" />
+        <span>Wishlist</span>
+      </a>
+      <button
+        type="button"
+        class="icon-button header__menu-toggle"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="mobile-menu"
+        (click)="toggleMenu()"
+      >
+        <app-icon [name]="menuOpen() ? 'close' : 'menu'" />
+        <span class="sr-only">{{ menuOpen() ? 'Close menu' : 'Open menu' }}</span>
+      </button>
+    </div>
+  </div>
+
+  @if (searchOpen()) {
+    <form
+      id="mobile-search"
+      class="mobile-search wrap"
+      role="search"
+      (submit)="submitSearch($event)"
+    >
+      <label class="sr-only" for="mobile-search-input">Search for movies</label>
+      <input
+        id="mobile-search-input"
+        type="search"
+        placeholder="Search for movies..."
+        [value]="query()"
+        (input)="onQuery($event)"
+      />
+    </form>
+  }
+
+  @if (menuOpen()) {
+    <nav id="mobile-menu" class="mobile-menu wrap" aria-label="Mobile">
+      <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="exactLink">Home</a>
+      <a routerLink="/genres" routerLinkActive="is-active">Genres</a>
+      <a routerLink="/wishlist" routerLinkActive="is-active">Wishlist</a>
+    </nav>
+  }
+</header>

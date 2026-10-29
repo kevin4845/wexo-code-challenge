@@ -1,0 +1,40 @@
+<div class="wrap page">
+  <header class="page-intro">
+    <h1>My Wishlist</h1>
+    <p>
+      @if (count() === 1) {
+        1 saved movie
+      } @else {
+        {{ formatCount(count()) }} saved movies
+      }
+    </p>
+  </header>
+
+  @if (items().length === 0) {
+    <section class="empty-wishlist">
+      <div class="empty-wishlist__shelf" aria-hidden="true">
+        @for (movie of shelf; track movie.id) {
+          @if (movie.posterPath; as src) {
+            <img [src]="src" alt="" />
+          }
+        }
+      </div>
+      <app-icon name="clapper" />
+      <h2>Add more movies to your wishlist</h2>
+      <p>Find movies you love and save them here.</p>
+      <a class="btn btn-primary" routerLink="/">Browse movies</a>
+    </section>
+  } @else {
+    <div class="movie-grid">
+      @for (movie of items(); track movie.id) {
+        <app-movie-card [movie]="movie" [alwaysShowAction]="true" />
+      }
+    </div>
+    <section class="empty-wishlist empty-wishlist--compact">
+      <app-icon name="clapper" />
+      <h2>Add more movies to your wishlist</h2>
+      <p>Find movies you love and save them here.</p>
+      <a class="btn btn-primary" routerLink="/">Browse movies</a>
+    </section>
+  }
+</div>

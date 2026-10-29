@@ -107,7 +107,7 @@ src/
       └─ wishlist/
 ```
 
-`core/`, `shared/`, and `features/` currently contain `.gitkeep` files so Git retains the directories. They are not application code. Conventions for what belongs in each directory are in [docs/architecture.md](docs/architecture.md) and [docs/development-guidelines.md](docs/development-guidelines.md).
+Conventions for what belongs in each directory are in [docs/architecture.md](docs/architecture.md) and [docs/development-guidelines.md](docs/development-guidelines.md). Empty directories that have no code yet keep a `.gitkeep` file.
 
 ## Environment configuration
 
@@ -117,31 +117,27 @@ src/
 | `src/environments/environment.ts`             | Production settings. Used by `npm run build`.                  |
 | `src/environments/environment.development.ts` | Development settings. Used by `npm start` and `npm run watch`. |
 
-Both setting files leave TMDB values empty:
+Both setting files use TMDB’s public hosts and leave the API key empty:
 
 ```ts
 tmdb: {
   apiKey: '',
-  apiBaseUrl: '',
-  imageBaseUrl: '',
+  apiBaseUrl: 'https://api.themoviedb.org/3',
+  imageBaseUrl: 'https://image.tmdb.org/t/p',
 }
 ```
 
-Empty strings mean the values are not configured. Do not invent values in the tracked files, and do not commit a real API key.
-
-`.gitignore` ignores `.env`, `.env.*` except `.env.example`, and `src/environments/*.local.ts`. When API work starts, put credentials in a gitignored `src/environments/*.local.ts` file. `environment.development.ts` must not import `environment.ts`: the development build replaces that file, so an import would point at itself.
+The key is not committed. `.gitignore` ignores `.env`, `.env.*` except `.env.example`, and `src/environments/*.local.ts`. Put a real key only in a gitignored local file, then point the development `fileReplacements` entry at that file. `environment.development.ts` must not import `environment.ts`: the development build replaces that file, so an import would point at itself.
 
 `src/main.ts` calls `enableProdMode()` only when `environment.production` is true.
 
-## Planned TMDB API integration
+## TMDB and wishlist
 
-No TMDB requests are implemented. Integration should follow this shape:
+`Tmdb` in `src/app/core/services/tmdb.ts` is the only code that calls TMDB. `tmdbAuthInterceptor` adds the API key to those requests and refuses to send one when the key is empty. The interface does not display raw HTTP errors, because those errors can contain the request URL and therefore the key.
 
-- Add a service under `src/app/core/services/` that is the only place that calls TMDB.
-- Read `apiKey`, `apiBaseUrl`, and `imageBaseUrl` from `environment`. Copy the URL values from the current TMDB API documentation, and copy the key from the developer’s own TMDB account.
-- Register cross-cutting HTTP behavior, such as attaching the credential, with `provideHttpClient(withInterceptors([...]))` in `src/app/app.config.ts`.
-- Refuse to send a request when `apiKey` or `apiBaseUrl` is empty.
-- Keep the key out of Git, logs, and error messages.
+The homepage hero is the first popular film that has a backdrop. Genre rows use discover for Action, Comedy, Thriller, War, Romance, Drama, Crime, Documentary and Horror. Film details, credits, trailers and similar titles come from the movie endpoints. Search uses `/search/movie`.
+
+`Wishlist` stores saved films in `localStorage` under `frame.wishlist`.
 
 Angular 22’s `HttpClient` uses the Fetch backend by default. `withFetch()` is deprecated and is not used.
 
@@ -163,18 +159,20 @@ This runs `ng test --watch=true`. Without `--watch`, the CLI watches only when i
 
 ## Current implementation status
 
-Configured and present:
+Present:
 
-- Standalone Angular application with a root router outlet
+- Standalone Angular application with the FRAME shell, homepage, genre pages, film details, search and wishlist
 - Router, zoneless change detection, and `HttpClient`
+- TMDB client and a browser wishlist stored in `localStorage`
 - Strict TypeScript and strict Angular templates
-- Development and production environment files, with TMDB fields empty
 - ESLint, Prettier, and the npm scripts above
-- Unit tests for the root component
+- Unit tests for the root component, TMDB response mapping and the wishlist
 
-Not implemented:
+Still required before films appear:
 
-- Visual design and page layouts
-- TMDB requests
-- Movie browsing, genre filtering, movie details, and the wishlist
-- UI component libraries and Tailwind CSS
+- A TMDB API key in a gitignored local environment file
+
+Not included:
+
+- A UI component library or Tailwind CSS
+- A backend for the wishlist

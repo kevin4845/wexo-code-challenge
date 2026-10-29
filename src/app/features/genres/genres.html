@@ -1,0 +1,23 @@
+<div class="wrap page">
+  <header class="page-intro">
+    <h1>Genres</h1>
+    <p>Nine ways into the catalogue. Open a genre to browse its films.</p>
+  </header>
+
+  <div class="genre-grid">
+    @for (row of rows; track row.genre.id) {
+      @if (configured && row.catalog.isLoading()) {
+        <div class="genre-card skeleton" aria-hidden="true"></div>
+      } @else {
+        <app-genre-card
+          [genreId]="row.genre.id"
+          [name]="row.genre.name"
+          [imageUrl]="
+            genreImage(row.genre.id, row.catalog.hasValue() ? row.catalog.value() : undefined)
+          "
+          [count]="rowCount(row.genre.id, row.catalog.hasValue() ? row.catalog.value() : undefined)"
+        />
+      }
+    }
+  </div>
+</div>

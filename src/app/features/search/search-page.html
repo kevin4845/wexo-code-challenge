@@ -1,0 +1,51 @@
+<div class="wrap page">
+  <header class="page-intro">
+    <h1>Search</h1>
+    @if (term()) {
+      <p>Results for “{{ term() }}”</p>
+    } @else {
+      <p>Search the catalogue by film title.</p>
+    }
+  </header>
+
+  @if (!configured) {
+    <section class="state">
+      <h2>Browse the preview selection</h2>
+      <p>Search will use the live catalogue later. These titles show the layout in the meantime.</p>
+    </section>
+    <div class="movie-grid">
+      @for (movie of highlights; track movie.id) {
+        <app-movie-card [movie]="movie" />
+      }
+    </div>
+  } @else if (!term()) {
+    <section class="state">
+      <h2>Look up a title</h2>
+      <p>Use the search field in the header. Results stay on this page.</p>
+    </section>
+  } @else if (results.isLoading()) {
+    <div class="movie-grid" aria-hidden="true">
+      @for (slot of [1, 2, 3, 4, 5, 6]; track slot) {
+        <div class="card-skeleton skeleton"></div>
+      }
+    </div>
+  } @else if (results.error()) {
+    <section class="state" role="alert">
+      <h2>Search didn’t complete</h2>
+      <p>{{ errorCopy(results.error()) }}</p>
+      <button type="button" class="btn btn-primary" (click)="results.reload()">Try again</button>
+    </section>
+  } @else if ((results.value()?.movies.length ?? 0) === 0) {
+    <section class="state">
+      <h2>No films matched</h2>
+      <p>Try a different title. Short or alternate names sometimes work better.</p>
+    </section>
+  } @else {
+    <p class="result-note">{{ formatCount(results.value()?.totalResults ?? 0) }} movies</p>
+    <div class="movie-grid">
+      @for (movie of results.value()?.movies ?? []; track movie.id) {
+        <app-movie-card [movie]="movie" />
+      }
+    </div>
+  }
+</div>

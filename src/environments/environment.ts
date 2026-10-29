@@ -4,7 +4,7 @@ export const environment: AppEnvironment = {
   production: true,
   tmdb: {
     apiKey: '',
-    apiBaseUrl: '',
-    imageBaseUrl: '',
+    apiBaseUrl: 'https://api.themoviedb.org/3',
+    imageBaseUrl: 'https://image.tmdb.org/t/p',
   },
 };

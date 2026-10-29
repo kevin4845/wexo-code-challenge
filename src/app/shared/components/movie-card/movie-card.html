@@ -1,0 +1,39 @@
+<article class="card" [class.card--action-visible]="alwaysShowAction()">
+  <div class="card__poster">
+    <a class="card__link" [routerLink]="['/movies', movie().id]">
+      @if (posterUrl(); as src) {
+        <img
+          [src]="src"
+          [alt]="movie().title + ' poster'"
+          width="342"
+          height="513"
+          loading="lazy"
+          decoding="async"
+          (error)="markImageFailed()"
+        />
+      } @else {
+        <span class="card__fallback">{{ movie().title }}</span>
+      }
+    </a>
+    <button
+      type="button"
+      class="card__save"
+      [class.is-saved]="saved()"
+      [attr.aria-pressed]="saved()"
+      [attr.aria-label]="
+        (saved() ? 'Remove ' : 'Add ') +
+        movie().title +
+        (saved() ? ' from wishlist' : ' to wishlist')
+      "
+      (click)="toggle($event)"
+    >
+      <app-icon [name]="saved() ? 'heart-filled' : 'heart'" />
+    </button>
+  </div>
+  <p class="card__title">
+    <a [routerLink]="['/movies', movie().id]">{{ movie().title }}</a>
+  </p>
+  @if (movie().releaseYear) {
+    <p class="card__year">{{ movie().releaseYear }}</p>
+  }
+</article>

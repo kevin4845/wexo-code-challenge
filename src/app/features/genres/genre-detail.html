@@ -1,0 +1,64 @@
+<div class="wrap page">
+  @if (configured && catalog.isLoading()) {
+    <div class="banner skeleton" aria-hidden="true"></div>
+  } @else if (configured && catalog.error() && gridMovies().length === 0) {
+    <section class="state" role="alert">
+      <h1>{{ genreName() }}</h1>
+      <p>{{ errorCopy(catalog.error()) }}</p>
+      <button type="button" class="btn btn-primary" (click)="catalog.reload()">Try again</button>
+    </section>
+  } @else {
+    <section class="banner">
+      @if (banner(); as src) {
+        <img [src]="src" alt="" />
+      }
+      <div class="banner__shade"></div>
+      <div class="banner__copy">
+        <h1>{{ genreName() }}</h1>
+        @if (genreDescription(); as description) {
+          <p>{{ description }}</p>
+        }
+        @if (showingPreview()) {
+          <p class="banner__count">Preview selection</p>
+        } @else if (catalog.value(); as page) {
+          <p class="banner__count">{{ formatCount(page.totalResults) }} movies</p>
+        }
+      </div>
+    </section>
+
+    @if (!showingPreview()) {
+      <div class="chips" role="group" aria-label="Sort films">
+        @for (option of sorts; track option.id) {
+          <button
+            type="button"
+            class="chip"
+            [class.is-active]="currentSort() === option.id"
+            [attr.aria-pressed]="currentSort() === option.id"
+            (click)="setSort(option.id)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (gridMovies().length) {
+      @if (!showingPreview()) {
+        <p class="result-note">
+          Showing {{ gridMovies().length }} of
+          {{ formatCount(catalog.value()?.totalResults ?? 0) }}
+        </p>
+      }
+      <div class="movie-grid">
+        @for (movie of gridMovies(); track movie.id) {
+          <app-movie-card [movie]="movie" />
+        }
+      </div>
+    } @else {
+      <section class="state">
+        <h2>No films in this view</h2>
+        <p>Try another sort, or come back when the catalogue has more titles.</p>
+      </section>
+    }
+  }
+</div>

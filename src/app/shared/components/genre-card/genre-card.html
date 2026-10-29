@@ -1,0 +1,17 @@
+<a class="genre-card" [routerLink]="['/genres', genreId()]">
+  @if (imageUrl(); as src) {
+    <img [src]="src" alt="" width="780" height="1170" loading="lazy" decoding="async" />
+  } @else {
+    <span class="genre-card__fallback" aria-hidden="true"></span>
+  }
+  <span class="genre-card__shade"></span>
+  <span class="genre-card__copy">
+    <span class="genre-card__name">{{ name() }}</span>
+    @let total = count();
+    @if (total !== null) {
+      <span class="genre-card__count"
+        >· {{ formatCount(total) }} {{ total === 1 ? 'movie' : 'movies' }}</span
+      >
+    }
+  </span>
+</a>

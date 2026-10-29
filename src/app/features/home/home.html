@@ -68,13 +68,17 @@
           @if (configured && row.catalog.isLoading()) {
             <div class="genre-card skeleton" aria-hidden="true"></div>
           } @else {
+            <!-- Count is the live total, or the preview sample when TMDB is not configured. -->
             <app-genre-card
               [genreId]="row.genre.id"
               [name]="row.genre.name"
               [imageUrl]="
                 rowImage(row.genre.id, row.catalog.hasValue() ? row.catalog.value() : undefined)
               "
-              [count]="rowCount(row.catalog.hasValue() ? row.catalog.value() : undefined)"
+              [count]="
+                rowCount(row.genre.id, row.catalog.hasValue() ? row.catalog.value() : undefined)
+              "
+              [countKind]="configured ? 'total' : 'preview'"
             />
           }
         }

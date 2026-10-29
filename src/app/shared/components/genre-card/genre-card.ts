@@ -14,6 +14,8 @@ export class GenreCard {
   readonly name = input.required<string>();
   readonly imageUrl = input<string | null>(null);
   readonly count = input<number | null>(null);
+  /** Preview counts are a sample, not the full catalogue total. */
+  readonly countKind = input<'total' | 'preview'>('total');
 
   protected readonly formatCount = formatCount;
 }

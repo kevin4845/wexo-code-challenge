@@ -9,9 +9,13 @@
     <span class="genre-card__name">{{ name() }}</span>
     @let total = count();
     @if (total !== null) {
-      <span class="genre-card__count"
-        >· {{ formatCount(total) }} {{ total === 1 ? 'movie' : 'movies' }}</span
-      >
+      <span class="genre-card__count">
+        @if (countKind() === 'preview') {
+          {{ formatCount(total) }} in preview
+        } @else {
+          · {{ formatCount(total) }} {{ total === 1 ? 'movie' : 'movies' }}
+        }
+      </span>
     }
   </span>
 </a>

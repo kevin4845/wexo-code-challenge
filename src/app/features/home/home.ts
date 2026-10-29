@@ -17,6 +17,7 @@ import {
   displayImage,
   PREVIEW_FEATURED,
   previewGenreArt,
+  previewGenreCount,
   previewMoviesForGenre,
 } from '../../shared/preview/preview-catalog';
 
@@ -82,8 +83,11 @@ export class Home {
     return live ?? previewGenreArt(genreId);
   }
 
-  protected rowCount(page: MoviePage | undefined): number | null {
-    return this.configured && page ? page.totalResults : null;
+  protected rowCount(genreId: number, page: MoviePage | undefined): number | null {
+    if (this.configured) {
+      return page ? page.totalResults : null;
+    }
+    return previewGenreCount(genreId);
   }
 
   protected toggleFeatured(movie: MovieSummary): void {

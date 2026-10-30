@@ -1,4 +1,4 @@
-<div class="page">
+<div class="animate-fade-in pt-5 pb-4 md:pt-[1.6rem]">
   @if (configured && featured.isLoading()) {
     <div class="hero-bleed">
       <div class="hero skeleton" aria-hidden="true"></div>
@@ -6,34 +6,49 @@
   } @else if (heroFilm(); as film) {
     <!-- Backdrop is decorative: the title is the page heading. -->
     <div class="hero-bleed">
-      <section class="hero rise">
+      <section class="hero">
         @if (imageUrl(film.backdropPath, 'w1280'); as backdrop) {
           <img class="hero__media" [src]="backdrop" alt="" />
         }
         <div class="hero__shade"></div>
         <div class="hero__content">
-          <p class="eyebrow"><span class="accent-line" aria-hidden="true"></span> Featured film</p>
           <h1>{{ film.title }}</h1>
-          <p class="meta">
+          <p class="flex flex-wrap items-center gap-[0.45rem] text-muted">
             @if (film.releaseYear) {
               <span>{{ film.releaseYear }}</span>
             }
             @for (genre of film.genreNames; track genre) {
-              <span class="pill">{{ genre }}</span>
+              <span
+                class="inline-flex min-h-[1.7rem] items-center rounded-full border border-line-strong px-[0.65rem] py-[0.1rem] text-[0.82rem] text-ink"
+                >{{ genre }}</span
+              >
             }
             @if (formatVote(film.voteAverage); as rating) {
-              <span class="rating">{{ rating }}</span>
+              <span
+                class="inline-flex min-h-[1.7rem] items-center rounded-full bg-accent/18 px-[0.55rem] font-semibold text-ink"
+                >{{ rating }}</span
+              >
             }
           </p>
           @if (film.overview) {
             <p class="hero__overview">{{ film.overview }}</p>
           }
-          <div class="hero__actions">
-            <a class="btn btn-primary" [routerLink]="['/movies', film.id]">
+          <div class="mt-[0.4rem] flex flex-wrap items-center gap-[0.7rem]">
+            <a
+              class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-[0.45rem] rounded-full border border-transparent bg-accent-strong px-[1.15rem] py-[0.55rem] font-semibold text-ink no-underline transition duration-frame ease-frame hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent-strong)_42%,transparent)] active:translate-y-0"
+              [routerLink]="['/movies', film.id]"
+              (pointerdown)="armStill($event, film.id)"
+              (keydown)="armStill($event, film.id)"
+            >
               <app-icon name="play" />
               Explore movie
             </a>
-            <button type="button" class="btn btn-ghost" (click)="toggleFeatured(film)">
+            <button
+              type="button"
+              class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-[0.45rem] rounded-full border border-line-strong bg-canvas/28 px-[1.15rem] py-[0.55rem] font-semibold text-ink no-underline transition duration-frame ease-frame hover:-translate-y-px hover:border-accent hover:bg-accent/12 active:translate-y-0"
+              [class.is-saved]="isSaved(film.id)"
+              (click)="toggleFeatured(film)"
+            >
               <app-icon [name]="isSaved(film.id) ? 'heart-filled' : 'heart'" />
               {{ isSaved(film.id) ? 'On wishlist' : 'Add to wishlist' }}
             </button>
@@ -43,22 +58,34 @@
     </div>
   }
 
-  <div class="wrap">
+  <div class="mx-auto w-[min(1680px,calc(100%-(var(--gutter)*2)))]">
     @if (configured && featured.error() && !heroFilm()) {
-      <section class="state" role="alert">
+      <section
+        class="flex flex-col items-start gap-[0.7rem] rounded-lg border border-line bg-surface p-6 [&_p]:max-w-[34rem] [&_p]:text-muted"
+        role="alert"
+      >
         <h1>The featured film didn’t load</h1>
         <p>{{ errorCopy(featured.error()) }}</p>
-        <button type="button" class="btn btn-primary" (click)="featured.reload()">Try again</button>
+        <button
+          type="button"
+          class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-[0.45rem] rounded-full border border-transparent bg-accent-strong px-[1.15rem] py-[0.55rem] font-semibold text-ink transition duration-frame ease-frame hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent-strong)_42%,transparent)] active:translate-y-0"
+          (click)="featured.reload()"
+        >
+          Try again
+        </button>
       </section>
     }
 
-    <section class="section" aria-labelledby="popular-genres">
-      <div class="section__heading">
-        <div>
+    <section class="mt-[2.6rem]" aria-labelledby="popular-genres">
+      <div class="mb-4 flex items-center justify-between gap-4 max-md:items-start">
+        <div class="flex min-w-0 flex-col">
           <h2 id="popular-genres">Popular genres</h2>
-          <p>Discover movies from different genres</p>
+          <p class="mt-[0.3rem] max-w-[40rem] text-muted">Discover movies from different genres</p>
         </div>
-        <a class="text-link" routerLink="/genres">
+        <a
+          class="inline-flex items-center gap-[0.35rem] font-semibold whitespace-nowrap text-accent no-underline transition-colors duration-frame ease-frame hover:text-ink [&_app-icon]:transition-transform [&_app-icon]:duration-frame [&_app-icon]:ease-frame hover:[&_app-icon]:translate-x-[3px]"
+          routerLink="/genres"
+        >
           View all genres
           <app-icon name="arrow" />
         </a>
@@ -66,7 +93,7 @@
       <div class="scroller">
         @for (row of rows; track row.genre.id) {
           @if (configured && row.catalog.isLoading()) {
-            <div class="genre-card skeleton" aria-hidden="true"></div>
+            <div class="genre-card skeleton aspect-[2/3] overflow-hidden rounded-md" aria-hidden="true"></div>
           } @else {
             <!-- Count is the live total, or the preview sample when TMDB is not configured. -->
             <app-genre-card
@@ -86,13 +113,16 @@
     </section>
 
     @for (row of rows; track row.genre.id) {
-      <section class="section" [attr.aria-labelledby]="'genre-' + row.genre.id">
-        <div class="section__heading">
-          <div>
+      <section class="mt-[2.6rem]" [attr.aria-labelledby]="'genre-' + row.genre.id">
+        <div class="mb-4 flex items-center justify-between gap-4 max-md:items-start">
+          <div class="flex min-w-0 flex-col">
             <h2 [id]="'genre-' + row.genre.id">{{ row.genre.name }}</h2>
-            <p>{{ row.genre.description }}</p>
+            <p class="mt-[0.3rem] max-w-[40rem] text-muted">{{ row.genre.description }}</p>
           </div>
-          <a class="text-link" [routerLink]="['/genres', row.genre.id]">
+          <a
+            class="inline-flex items-center gap-[0.35rem] font-semibold whitespace-nowrap text-accent no-underline transition-colors duration-frame ease-frame hover:text-ink [&_app-icon]:transition-transform [&_app-icon]:duration-frame [&_app-icon]:ease-frame hover:[&_app-icon]:translate-x-[3px]"
+            [routerLink]="['/genres', row.genre.id]"
+          >
             View all
             <app-icon name="arrow" />
           </a>
@@ -101,16 +131,16 @@
         @if (configured && row.catalog.isLoading()) {
           <div class="scroller" aria-hidden="true">
             @for (slot of [1, 2, 3, 4, 5, 6]; track slot) {
-              <div class="card-skeleton skeleton"></div>
+              <div class="card-skeleton skeleton relative aspect-[2/3] overflow-hidden rounded-md"></div>
             }
           </div>
         } @else if (configured && row.catalog.error()) {
-          <p class="inline-error" role="alert">{{ errorCopy(row.catalog.error()) }}</p>
+          <p class="mb-[0.9rem] text-muted" role="alert">{{ errorCopy(row.catalog.error()) }}</p>
         } @else if (
           rowMovies(row.genre.id, row.catalog.hasValue() ? row.catalog.value() : undefined)
             .length === 0
         ) {
-          <p class="inline-error">No films in this genre right now.</p>
+          <p class="mb-[0.9rem] text-muted">No films in this genre right now.</p>
         } @else {
           <div class="scroller">
             @for (

@@ -10,6 +10,7 @@ import { catalogueErrorCopy } from '../../core/services/tmdb-auth';
 import { Tmdb } from '../../core/services/tmdb';
 import { Wishlist } from '../../core/services/wishlist';
 import { tmdbImageUrl } from '../../core/tmdb-image';
+import { armFilmFrame } from '../../shared/motion/film-transition';
 import { GenreCard } from '../../shared/components/genre-card/genre-card';
 import { Icon } from '../../shared/components/icon/icon';
 import { MovieCard } from '../../shared/components/movie-card/movie-card';
@@ -92,6 +93,18 @@ export class Home {
 
   protected toggleFeatured(movie: MovieSummary): void {
     this.wishlist.toggle(movie);
+  }
+
+  /** Name the still only for Explore movie, before the router snapshots the page. */
+  protected armStill(event: Event, id: number): void {
+    if (event instanceof KeyboardEvent && event.key !== 'Enter') {
+      return;
+    }
+    const hero = (event.currentTarget as HTMLElement).closest('.hero');
+    const frame = hero?.querySelector('.hero__media');
+    if (frame instanceof HTMLElement) {
+      armFilmFrame(frame, `still-${id}`);
+    }
   }
 
   protected isSaved(id: number): boolean {

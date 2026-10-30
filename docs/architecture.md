@@ -78,8 +78,8 @@ Do not add a global store. Signals are enough for this one collection.
 - Zoneless change detection. `zone.js` is not a dependency. Update state through signals, template events, or `HttpClient` so the view refreshes.
 - OnPush is the compiler default when a component omits `changeDetection`. Leave that default in place.
 - No server-side rendering. The challenge is a client application, and SSR would add a server build without a current need.
-- No UI library and no Tailwind configuration in this setup.
-- SCSS for component styles and `src/styles.scss` for global styles.
+- No UI component library. Tailwind CSS supplies layout, type, and color. `src/styles.scss` keeps the theme and the rules utilities express poorly: layered photographs, scrollers, and motion.
+- Component SCSS is limited to host layout, such as the sticky header.
 - Strict TypeScript (`strict`) and strict Angular templates (`strictTemplates`), plus the extra checks generated for a strict Angular application: `noImplicitOverride`, `noPropertyAccessFromIndexSignature`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `strictInjectionParameters`, and `strictInputAccessModifiers`.
 
 The decision record for this setup is [decisions/0001-angular-application-setup.md](decisions/0001-angular-application-setup.md).

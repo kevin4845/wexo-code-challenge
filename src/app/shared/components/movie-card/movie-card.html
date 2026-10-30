@@ -1,8 +1,17 @@
-<article class="card" [class.card--action-visible]="alwaysShowAction()">
-  <div class="card__poster">
-    <a class="card__link" [routerLink]="['/movies', movie().id]">
+<article
+  class="group has-[a:focus-visible]:outline has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-4 has-[a:focus-visible]:outline-accent"
+  [class.card--action-visible]="alwaysShowAction()"
+>
+  <div class="relative aspect-[2/3] overflow-hidden rounded-md bg-surface-2">
+    <a
+      class="block h-full text-inherit no-underline focus-visible:outline-none"
+      [routerLink]="['/movies', movie().id]"
+      (pointerdown)="armPoster($event)"
+      (keydown)="armPoster($event)"
+    >
       @if (posterUrl(); as src) {
         <img
+          class="size-full object-cover transition-transform duration-enter ease-frame group-hover:scale-[1.03] group-focus-within:scale-[1.03]"
           [src]="src"
           [alt]="movie().title + ' poster'"
           width="342"
@@ -15,9 +24,13 @@
         <span class="card__fallback">{{ movie().title }}</span>
       }
     </a>
+    <span
+      class="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_62%,rgb(11_11_15/0.42))]"
+      aria-hidden="true"
+    ></span>
     <button
       type="button"
-      class="card__save"
+      class="absolute top-[0.45rem] right-[0.45rem] z-[1] grid size-9 cursor-pointer place-items-center rounded-full border-0 bg-canvas/62 text-ink opacity-0 transition-opacity duration-frame ease-frame group-hover:opacity-100 group-focus-within:opacity-100 group-[.card--action-visible]:opacity-100 max-md:opacity-100 [&.is-saved]:text-accent [&.is-saved]:opacity-100"
       [class.is-saved]="saved()"
       [attr.aria-pressed]="saved()"
       [attr.aria-label]="
@@ -30,10 +43,16 @@
       <app-icon [name]="saved() ? 'heart-filled' : 'heart'" />
     </button>
   </div>
-  <p class="card__title">
-    <a [routerLink]="['/movies', movie().id]">{{ movie().title }}</a>
+  <p class="mt-[0.55rem] text-[0.92rem] leading-[1.3] font-semibold tracking-[-0.02em]">
+    <a
+      class="text-inherit no-underline transition-colors duration-frame ease-frame hover:text-accent"
+      [routerLink]="['/movies', movie().id]"
+      (pointerdown)="armPoster($event)"
+      (keydown)="armPoster($event)"
+      >{{ movie().title }}</a
+    >
   </p>
   @if (movie().releaseYear) {
-    <p class="card__year">{{ movie().releaseYear }}</p>
+    <p class="mt-[0.15rem] text-[0.8rem] text-muted">{{ movie().releaseYear }}</p>
   }
 </article>

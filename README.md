@@ -86,7 +86,7 @@ ESLint uses `eslint-config-prettier` so formatting rules are left to Prettier. E
 src/
 ├─ main.ts                          Application bootstrap
 ├─ index.html
-├─ styles.scss                      Global styles
+├─ styles.scss                      Tailwind theme and the styles utilities cannot express
 ├─ environments/                    Build-time configuration
 └─ app/
    ├─ app.ts                        Root component
@@ -166,6 +166,7 @@ Present:
 - TMDB client and a browser wishlist stored in `localStorage`
 - Strict TypeScript and strict Angular templates
 - ESLint, Prettier, and the npm scripts above
+- Tailwind CSS for layout, type, and color, with a small stylesheet for motion and layered photographs
 - Unit tests for the root component, TMDB response mapping and the wishlist
 
 Still required before films appear:
@@ -174,5 +175,5 @@ Still required before films appear:
 
 Not included:
 
-- A UI component library or Tailwind CSS
+- A UI component library
 - A backend for the wishlist

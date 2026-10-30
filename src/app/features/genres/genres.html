@@ -1,13 +1,15 @@
-<div class="wrap page">
-  <header class="page-intro">
-    <h1>Genres</h1>
-    <p>Nine ways into the catalogue. Open a genre to browse its films.</p>
+<div class="mx-auto w-[min(1680px,calc(100%-(var(--gutter)*2)))] animate-fade-in pt-5 pb-4 md:pt-[1.6rem]">
+  <header class="mb-[1.4rem]">
+    <h1 class="text-[clamp(2.2rem,4vw,3.4rem)]">Genres</h1>
+    <p class="mt-[0.3rem] max-w-[40rem] text-muted">
+      Nine ways into the catalogue. Open a genre to browse its films.
+    </p>
   </header>
 
-  <div class="genre-grid">
+  <div class="genre-grid grid grid-cols-2 gap-x-3 gap-y-4 md:grid-cols-3">
     @for (row of rows; track row.genre.id) {
       @if (configured && row.catalog.isLoading()) {
-        <div class="genre-card skeleton" aria-hidden="true"></div>
+        <div class="genre-card skeleton aspect-[2/3] overflow-hidden rounded-md" aria-hidden="true"></div>
       } @else {
         <app-genre-card
           [genreId]="row.genre.id"

@@ -64,6 +64,6 @@ npm test
 
 - Add a file when it has a behavior or a type the application uses. Do not add empty services, mock catalogs, or placeholder screens.
 - Prefer a function or a service method over a new class hierarchy.
-- Do not add NgRx, a UI component library, or Tailwind until a task asks for that dependency.
+- Do not add NgRx or a UI component library. Style new interface with Tailwind utilities. Add component CSS only for motion or layered layout that utilities cannot express cleanly.
 - Keep TMDB types close to the service that returns them until another feature needs the same type. Move a type to `core/models/` when a second feature imports it.
 - Comments should record a constraint that the code cannot show on its own, such as why a credential must stay empty. Do not comment obvious assignments.

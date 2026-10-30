@@ -1,16 +1,36 @@
-<header class="header">
-  <div class="wrap header__bar">
-    <a class="wordmark" routerLink="/">FRAME</a>
+<header class="border-b border-line bg-canvas/78 backdrop-blur-[18px]">
+  <div
+    class="mx-auto flex min-h-[4.5rem] w-[min(1280px,calc(100%-(var(--gutter)*2)))] items-center gap-5"
+  >
+    <a class="text-[0.95rem] font-bold tracking-[0.18em] text-ink no-underline" routerLink="/"
+      >FRAME</a
+    >
 
-    <nav class="header__nav" aria-label="Primary">
-      <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="exactLink">Home</a>
-      <a routerLink="/genres" routerLinkActive="is-active">Genres</a>
+    <nav class="flex items-center gap-[1.1rem] max-md:hidden" aria-label="Primary">
+      <a
+        class="nav-link py-[0.35rem] text-[0.95rem] text-muted no-underline transition-colors duration-frame ease-frame hover:text-ink"
+        routerLink="/"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="exactLink"
+        >Home</a
+      >
+      <a
+        class="nav-link py-[0.35rem] text-[0.95rem] text-muted no-underline transition-colors duration-frame ease-frame hover:text-ink"
+        routerLink="/genres"
+        routerLinkActive="is-active"
+        >Genres</a
+      >
     </nav>
 
-    <form class="search" role="search" (submit)="submitSearch($event)">
+    <form
+      class="mx-auto flex min-h-[2.6rem] max-w-[28rem] flex-1 items-center gap-[0.55rem] rounded-full border border-line bg-surface px-[0.95rem] text-muted transition-[border-color,background-color] duration-frame ease-frame hover:border-line-strong focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent max-md:hidden"
+      role="search"
+      (submit)="submitSearch($event)"
+    >
       <label class="sr-only" for="site-search">Search for movies</label>
       <app-icon name="search" />
       <input
+        class="min-h-[2.4rem] w-full border-0 bg-transparent text-ink placeholder:text-muted focus:outline-none"
         id="site-search"
         type="search"
         name="q"
@@ -20,10 +40,10 @@
       />
     </form>
 
-    <div class="header__tools">
+    <div class="ml-auto flex items-center gap-[0.35rem]">
       <button
         type="button"
-        class="icon-button header__search-toggle"
+        class="hidden size-11 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-ink max-md:inline-flex"
         [attr.aria-expanded]="searchOpen()"
         aria-controls="mobile-search"
         (click)="toggleSearch()"
@@ -31,13 +51,17 @@
         <app-icon name="search" />
         <span class="sr-only">Search</span>
       </button>
-      <a class="wishlist-link" routerLink="/wishlist" routerLinkActive="is-active">
+      <a
+        class="nav-link inline-flex min-h-11 items-center gap-[0.4rem] px-[0.35rem] text-ink no-underline"
+        routerLink="/wishlist"
+        routerLinkActive="is-active"
+      >
         <app-icon name="heart" />
-        <span>Wishlist</span>
+        <span class="max-md:sr-only">Wishlist</span>
       </a>
       <button
         type="button"
-        class="icon-button header__menu-toggle"
+        class="hidden size-11 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-ink max-md:inline-flex"
         [attr.aria-expanded]="menuOpen()"
         aria-controls="mobile-menu"
         (click)="toggleMenu()"
@@ -51,12 +75,13 @@
   @if (searchOpen()) {
     <form
       id="mobile-search"
-      class="mobile-search wrap"
+      class="mx-auto hidden w-[min(1280px,calc(100%-(var(--gutter)*2)))] pb-[0.85rem] max-md:flex"
       role="search"
       (submit)="submitSearch($event)"
     >
       <label class="sr-only" for="mobile-search-input">Search for movies</label>
       <input
+        class="min-h-[2.4rem] w-full rounded-full border border-line bg-surface px-4 text-ink placeholder:text-muted focus:outline-2 focus:outline-offset-2 focus:outline-accent"
         id="mobile-search-input"
         type="search"
         placeholder="Search for movies..."
@@ -67,10 +92,30 @@
   }
 
   @if (menuOpen()) {
-    <nav id="mobile-menu" class="mobile-menu wrap" aria-label="Mobile">
-      <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="exactLink">Home</a>
-      <a routerLink="/genres" routerLinkActive="is-active">Genres</a>
-      <a routerLink="/wishlist" routerLinkActive="is-active">Wishlist</a>
+    <nav
+      id="mobile-menu"
+      class="mx-auto hidden w-[min(1280px,calc(100%-(var(--gutter)*2)))] flex-col items-start gap-[0.35rem] pb-4 max-md:flex"
+      aria-label="Mobile"
+    >
+      <a
+        class="py-[0.35rem] text-[0.95rem] text-muted no-underline transition-colors duration-frame ease-frame hover:text-ink"
+        routerLink="/"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="exactLink"
+        >Home</a
+      >
+      <a
+        class="py-[0.35rem] text-[0.95rem] text-muted no-underline transition-colors duration-frame ease-frame hover:text-ink"
+        routerLink="/genres"
+        routerLinkActive="is-active"
+        >Genres</a
+      >
+      <a
+        class="py-[0.35rem] text-[0.95rem] text-muted no-underline transition-colors duration-frame ease-frame hover:text-ink"
+        routerLink="/wishlist"
+        routerLinkActive="is-active"
+        >Wishlist</a
+      >
     </nav>
   }
 </header>

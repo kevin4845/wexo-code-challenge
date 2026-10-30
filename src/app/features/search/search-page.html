@@ -1,48 +1,63 @@
-<div class="wrap page">
-  <header class="page-intro">
-    <h1>Search</h1>
+<div class="mx-auto w-[min(1680px,calc(100%-(var(--gutter)*2)))] animate-fade-in pt-5 pb-4 md:pt-[1.6rem]">
+  <header class="mb-[1.4rem]">
+    <h1 class="text-[clamp(2.2rem,4vw,3.4rem)]">Search</h1>
     @if (term()) {
-      <p>Results for “{{ term() }}”</p>
+      <p class="mt-[0.3rem] max-w-[40rem] text-muted">Results for “{{ term() }}”</p>
     } @else {
-      <p>Search the catalogue by film title.</p>
+      <p class="mt-[0.3rem] max-w-[40rem] text-muted">Search the catalogue by film title.</p>
     }
   </header>
 
   @if (!configured) {
-    <section class="state">
+    <section
+      class="flex flex-col items-start gap-[0.7rem] rounded-lg border border-line bg-surface p-6 [&_p]:max-w-[34rem] [&_p]:text-muted"
+    >
       <h2>Browse the preview selection</h2>
       <p>Search will use the live catalogue later. These titles show the layout in the meantime.</p>
     </section>
-    <div class="movie-grid">
+    <div class="movie-grid grid grid-cols-2 gap-x-3 gap-y-4 md:grid-cols-4">
       @for (movie of highlights; track movie.id) {
         <app-movie-card [movie]="movie" />
       }
     </div>
   } @else if (!term()) {
-    <section class="state">
+    <section
+      class="flex flex-col items-start gap-[0.7rem] rounded-lg border border-line bg-surface p-6 [&_p]:max-w-[34rem] [&_p]:text-muted"
+    >
       <h2>Look up a title</h2>
       <p>Use the search field in the header. Results stay on this page.</p>
     </section>
   } @else if (results.isLoading()) {
-    <div class="movie-grid" aria-hidden="true">
+    <div class="movie-grid grid grid-cols-2 gap-x-3 gap-y-4 md:grid-cols-4" aria-hidden="true">
       @for (slot of [1, 2, 3, 4, 5, 6]; track slot) {
-        <div class="card-skeleton skeleton"></div>
+        <div class="card-skeleton skeleton relative aspect-[2/3] overflow-hidden rounded-md"></div>
       }
     </div>
   } @else if (results.error()) {
-    <section class="state" role="alert">
+    <section
+      class="flex flex-col items-start gap-[0.7rem] rounded-lg border border-line bg-surface p-6 [&_p]:max-w-[34rem] [&_p]:text-muted"
+      role="alert"
+    >
       <h2>Search didn’t complete</h2>
       <p>{{ errorCopy(results.error()) }}</p>
-      <button type="button" class="btn btn-primary" (click)="results.reload()">Try again</button>
+      <button
+        type="button"
+        class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-[0.45rem] rounded-full border border-transparent bg-accent-strong px-[1.15rem] py-[0.55rem] font-semibold text-ink transition duration-frame ease-frame hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent-strong)_42%,transparent)] active:translate-y-0"
+        (click)="results.reload()"
+      >
+        Try again
+      </button>
     </section>
   } @else if ((results.value()?.movies.length ?? 0) === 0) {
-    <section class="state">
+    <section
+      class="flex flex-col items-start gap-[0.7rem] rounded-lg border border-line bg-surface p-6 [&_p]:max-w-[34rem] [&_p]:text-muted"
+    >
       <h2>No films matched</h2>
       <p>Try a different title. Short or alternate names sometimes work better.</p>
     </section>
   } @else {
-    <p class="result-note">{{ formatCount(results.value()?.totalResults ?? 0) }} movies</p>
-    <div class="movie-grid">
+    <p class="mb-[0.9rem] text-muted">{{ formatCount(results.value()?.totalResults ?? 0) }} movies</p>
+    <div class="movie-grid grid grid-cols-2 gap-x-3 gap-y-4 md:grid-cols-4">
       @for (movie of results.value()?.movies ?? []; track movie.id) {
         <app-movie-card [movie]="movie" />
       }

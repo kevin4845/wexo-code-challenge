@@ -38,7 +38,7 @@ Follow these conventions for this repository. The [Angular style guide](https://
 
 ## Future API error handling
 
-- Check `environment.tmdb` before sending a request. If `apiKey` or `apiBaseUrl` is empty, fail with an error that says the TMDB configuration is missing. Do not send the request.
+- Check `environment.tmdb` before sending a request. If `baseUrl` is empty, or both `accessToken` and `apiKey` are empty, fail with an error that says the TMDB configuration is missing. Do not send the request.
 - Let the core service perform the HTTP call. The feature that started the action is responsible for a loading state and an error state the user can see.
 - Do not catch an error and ignore it. Add context when rethrowing, without including the API key, the authorization header, or the raw credential.
 - Map transport failures and non-success HTTP statuses into a result the feature can render. A failed genre request must not be presented as an empty genre list.

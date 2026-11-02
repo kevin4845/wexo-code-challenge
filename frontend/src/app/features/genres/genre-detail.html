@@ -1,0 +1,78 @@
+<div class="wrap page">
+  @if (!configured) {
+    <section class="state" role="alert">
+      <h1>{{ genreName() }}</h1>
+      <p>{{ configMessage }}</p>
+    </section>
+  } @else if (loadingFirst()) {
+    <div class="banner skeleton" aria-hidden="true"></div>
+  } @else if (loadError() && movies().length === 0) {
+    <section class="state" role="alert">
+      <h1>{{ genreName() }}</h1>
+      <p>{{ errorCopy(loadError()) }}</p>
+      <button type="button" class="btn btn-primary" (click)="retryFirst()">Try again</button>
+    </section>
+  } @else {
+    <section class="banner">
+      @if (banner(); as src) {
+        <img [src]="src" alt="" />
+      }
+      <div class="banner__shade"></div>
+      <div class="banner__copy">
+        <h1>{{ genreName() }}</h1>
+        @if (genreDescription(); as description) {
+          <p>{{ description }}</p>
+        }
+        @if (totalResults() > 0) {
+          <p class="banner__count">{{ formatCount(totalResults()) }} movies</p>
+        }
+      </div>
+    </section>
+
+    <div class="chips" role="group" aria-label="Sort films">
+      @for (option of sorts; track option.id) {
+        <button
+          type="button"
+          class="chip"
+          [class.is-active]="currentSort() === option.id"
+          [attr.aria-pressed]="currentSort() === option.id"
+          (click)="setSort(option.id)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+
+    @if (movies().length) {
+      <p class="result-note">
+        Showing {{ movies().length }} of
+        {{ formatCount(totalResults()) }}
+      </p>
+      <div class="movie-grid" [attr.aria-busy]="loadingMore()">
+        @for (movie of movies(); track movie.id) {
+          <app-movie-card [movie]="movie" />
+        }
+        @if (loadingMore()) {
+          @for (slot of [1, 2, 3]; track slot) {
+            <div class="card-skeleton skeleton" aria-hidden="true"></div>
+          }
+        }
+      </div>
+      @if (loadingMore()) {
+        <p class="sr-only" role="status">Loading more films</p>
+      }
+      @if (moreError(); as problem) {
+        <p class="inline-error" role="alert">
+          {{ errorCopy(problem) }}
+          <button type="button" class="text-link" (click)="loadMore()">Try again</button>
+        </p>
+      }
+      <div #sentinel class="scroll-sentinel" aria-hidden="true"></div>
+    } @else {
+      <section class="state">
+        <h2>No films in this view</h2>
+        <p>Try another sort, or come back when the catalogue has more titles.</p>
+      </section>
+    }
+  }
+</div>

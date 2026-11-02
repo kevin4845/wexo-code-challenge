@@ -1,13 +1,42 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
-# Compiled output
+# Frontend build output and dependencies
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+frontend/tmp/
+frontend/out-tsc/
+frontend/coverage/
+frontend/.env
+
+# Backend dependencies, caches, and secrets
+backend/vendor/
+backend/node_modules/
+backend/.env
+backend/.env.backup
+backend/.env.production
+backend/public/build/
+backend/public/hot/
+backend/public/storage
+backend/public/fonts-manifest.dev.json
+backend/storage/*.key
+backend/storage/pail
+backend/.phpunit.cache/
+backend/.phpunit.result.cache
+backend/auth.json
+
+# Local secrets. Example files stay tracked.
+.env
+.env.*
+!.env.example
+frontend/src/environments/*.local.ts
+
+# Compiled output if a tool is run from the wrong directory
 /dist
 /tmp
 /out-tsc
 /bazel-out
-
-# Node
-/node_modules
+node_modules/
 npm-debug.log
 yarn-error.log
 
@@ -19,6 +48,10 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+.phpactor.json
+_ide_helper.php
+Homestead.json
+Homestead.yaml
 
 # Visual Studio Code
 .vscode/*
@@ -27,10 +60,15 @@ yarn-error.log
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/mcp.json
+frontend/.vscode/*
+!frontend/.vscode/settings.json
+!frontend/.vscode/tasks.json
+!frontend/.vscode/launch.json
+!frontend/.vscode/extensions.json
+!frontend/.vscode/mcp.json
 .history/*
 
 # Miscellaneous
-/.angular/cache
 .sass-cache/
 /connect.lock
 /coverage
@@ -42,9 +80,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
-
-# Local secrets and environment overrides. Never commit API keys.
-.env
-.env.*
-!.env.example
-src/environments/*.local.ts
+*.log
+frontend/src/environments/environment.development.ts
+frontend/src/environments/environment.development.ts

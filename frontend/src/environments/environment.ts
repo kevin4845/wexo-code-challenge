@@ -2,15 +2,11 @@ import type { AppEnvironment } from './environment.model';
 
 /**
  * Production settings, used by `npm run build`.
- * Leave the credentials empty here. A real token belongs only in a local,
- * uncommitted environment file. See environment.example.ts.
+ * `/api` is same-origin. Set this to the deployed Laravel origin before
+ * building when the API is hosted separately.
  */
 export const environment: AppEnvironment = {
   production: true,
-  tmdb: {
-    baseUrl: 'https://api.themoviedb.org/3',
-    imageBaseUrl: 'https://image.tmdb.org/t/p',
-    accessToken: '',
-    apiKey: '',
-  },
+  apiBaseUrl: '/api',
+  imageBaseUrl: 'https://image.tmdb.org/t/p',
 };

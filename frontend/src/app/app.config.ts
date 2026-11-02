@@ -1,4 +1,4 @@
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
@@ -11,7 +11,6 @@ import {
   withViewTransitions,
 } from '@angular/router';
 
-import { tmdbAuthInterceptor } from './core/services/tmdb-auth';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -31,6 +30,6 @@ export const appConfig: ApplicationConfig = {
         },
       }),
     ),
-    provideHttpClient(withInterceptors([tmdbAuthInterceptor])),
+    provideHttpClient(),
   ],
 };

@@ -38,12 +38,12 @@ Follow these conventions for this repository. The [Angular style guide](https://
 
 ## Future API error handling
 
-- Check `environment.tmdb` before sending a request. If `baseUrl` is empty, or both `accessToken` and `apiKey` are empty, fail with an error that says the TMDB configuration is missing. Do not send the request.
+- The browser calls the Laravel API. It does not call TMDB and it does not hold a TMDB credential.
+- Check `environment.apiBaseUrl` before sending a request. If it is empty, fail before the request.
 - Let the core service perform the HTTP call. The feature that started the action is responsible for a loading state and an error state the user can see.
-- Do not catch an error and ignore it. Add context when rethrowing, without including the API key, the authorization header, or the raw credential.
+- Do not catch an error and ignore it. Add context when rethrowing, without including request URLs that could carry a credential.
 - Map transport failures and non-success HTTP statuses into a result the feature can render. A failed genre request must not be presented as an empty genre list.
-- Put cross-cutting HTTP behavior in one functional interceptor registered with `provideHttpClient()`. Do not copy credential or logging logic into each call.
-- Log failures with `console.error` or a later logger only when the message is safe to store. Do not log request headers that contain the API key.
+- Log failures with `console.error` or a later logger only when the message is safe to store.
 
 ## Formatting and linting
 

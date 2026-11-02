@@ -64,7 +64,7 @@ npm run format:check
 
 `npm run watch` rebuilds the development configuration. It does not serve the app.
 
-The Angular app is standalone and zoneless, styled with Tailwind CSS and a small SCSS layer. `frontend/src/main.ts` bootstraps `App`. Routes, the TMDB client, and the browser wishlist live under `frontend/src/app/`. Notes on those choices are in [docs/architecture.md](docs/architecture.md) and [docs/development-guidelines.md](docs/development-guidelines.md). Those notes use paths inside the Angular app, so run the npm commands from `frontend/`.
+The Angular app is standalone and zoneless, styled with Tailwind CSS and a small SCSS layer. `frontend/src/main.ts` bootstraps `App`. Routes, the catalogue client, and the browser wishlist live under `frontend/src/app/`. The browser calls Laravel. Laravel calls TMDB. Notes on the app structure are in [docs/architecture.md](docs/architecture.md) and [docs/development-guidelines.md](docs/development-guidelines.md). Those notes use paths inside the Angular app, so run the npm commands from `frontend/`.
 
 ### Frontend environment
 
@@ -74,15 +74,15 @@ The Angular app is standalone and zoneless, styled with Tailwind CSS and a small
 | `frontend/src/environments/environment.ts`               | Production settings. Used by `npm run build`. |
 | `frontend/src/environments/environment.development.ts`   | Development settings. Used by `npm start`.    |
 
-Both setting files use TMDB’s public hosts. Put a read access token in `environment.development.ts` for local work. Do not commit that token.
+Development uses `https://frame-backend.ddev.site/api`. Production uses the relative path `/api`, so the built app calls the API on the same origin. If Laravel is hosted on another domain, set `apiBaseUrl` in `environment.ts` to that origin before building, and add that frontend origin to `CORS_ALLOWED_ORIGINS`.
 
-A credential in this frontend is readable in the compiled JavaScript bundle. That is acceptable for this test project only. A production app should keep the token in backend environment variables or Cloudflare secrets and proxy TMDB through that backend.
+Poster and backdrop URLs are still built in the browser from `imageBaseUrl` (`https://image.tmdb.org/t/p`) and the path returned by the API. Image files are not proxied.
 
-The read access token is sent as a Bearer token. The API key is sent only when the token is empty. `.gitignore` ignores `.env`, `.env.*` except `.env.example`, and `frontend/src/environments/*.local.ts`.
+`.gitignore` ignores `.env`, `.env.*` except `.env.example`, and `frontend/src/environments/*.local.ts`.
 
 ## Backend
 
-The backend is a fresh Laravel application running in DDEV. It has the standard routes, configuration, and tests. It does not call TMDB and it does not add application endpoints.
+Laravel runs in DDEV and proxies TMDB. The read access token and API key live only in `backend/.env`. The token is preferred. The API key is sent only when the token is empty.
 
 DDEV is configured in `backend/.ddev/` as project `frame-backend`, with PHP 8.4, nginx-fpm, and MySQL 8.0. Laravel connects to that database with host `db`, database `db`, username `db`, and password `db`.
 
@@ -104,9 +104,9 @@ cd backend
 copy .env.example .env
 ```
 
-On macOS or Linux, use `cp .env.example .env` instead of `copy`. `.env.example` is tracked. `.env` is ignored and must not be committed. The example contains only DDEV’s default database credentials.
+On macOS or Linux, use `cp .env.example .env` instead of `copy`. `.env.example` is tracked. `.env` is ignored and must not be committed. Put the TMDB read access token in `TMDB_ACCESS_TOKEN`. Leave `TMDB_API_KEY` empty unless there is no token. `CORS_ALLOWED_ORIGINS` lists the browser origins allowed to call the API. The example database user and password are DDEV’s defaults.
 
-The application is at `https://frame-backend.ddev.site`.
+The application is at `https://frame-backend.ddev.site`. The API is under `https://frame-backend.ddev.site/api`.
 
 Stop DDEV:
 

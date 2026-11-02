@@ -21,7 +21,7 @@ import {
 import { TmdbConfigError } from './tmdb-auth';
 
 /**
- * The only place that talks to TMDB. Pages ask for films; they do not build request URLs.
+ * The only place that talks to the catalogue API. Laravel proxies TMDB.
  * Successful responses are memoized for the session so a genre row and its genre page share one request.
  */
 @Service()
@@ -30,18 +30,17 @@ export class Tmdb {
   private readonly cache = new Map<string, Observable<unknown>>();
 
   isConfigured(): boolean {
-    const { accessToken, apiKey, baseUrl } = environment.tmdb;
-    return baseUrl.trim().length > 0 && (accessToken.trim().length > 0 || apiKey.trim().length > 0);
+    return environment.apiBaseUrl.trim().length > 0;
   }
 
   /** Films moving this week. The homepage hero uses the first title that has a backdrop. */
   trending(): Observable<MoviePage> {
-    return this.memo('trending', () => this.get('/trending/movie/week').pipe(map(parseMoviePage)));
+    return this.memo('trending', () => this.get('/movies/trending').pipe(map(parseMoviePage)));
   }
 
   /** Current popular films. */
   popular(): Observable<MoviePage> {
-    return this.memo('popular', () => this.get('/movie/popular').pipe(map(parseMoviePage)));
+    return this.memo('popular', () => this.get('/movies/popular').pipe(map(parseMoviePage)));
   }
 
   /** A current trending film that has a backdrop, used as the homepage hero. */
@@ -71,10 +70,9 @@ export class Tmdb {
 
     const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
     return this.memo(`genre:${genreId}:${sort}:${safePage}`, () =>
-      this.get('/discover/movie', {
-        with_genres: genreId,
+      this.get(`/genres/${genreId}/movies`, {
         page: safePage,
-        ...sortParams(sort),
+        sort,
       }).pipe(map(parseMoviePage)),
     );
   }
@@ -86,12 +84,12 @@ export class Tmdb {
       return throwError(() => new Error('Enter a film title to search.'));
     }
 
-    return this.get('/search/movie', { query: term, page: 1 }).pipe(map(parseMoviePage));
+    return this.get('/movies/search', { query: term, page: 1 }).pipe(map(parseMoviePage));
   }
 
   movie(id: number): Observable<MovieDetails> {
     return this.memo(`movie:${id}`, () =>
-      this.get(`/movie/${id}`).pipe(
+      this.get(`/movies/${id}`).pipe(
         map((body) => {
           const details = parseMovieDetails(body);
           if (!details) {
@@ -105,21 +103,21 @@ export class Tmdb {
 
   credits(id: number): Observable<MovieCredits> {
     return this.memo(`credits:${id}`, () =>
-      this.get(`/movie/${id}/credits`).pipe(map(parseCredits)),
+      this.get(`/movies/${id}/credits`).pipe(map(parseCredits)),
     );
   }
 
   /** YouTube trailer when TMDB has one. Null means the page should hide the trailer action. */
   trailer(id: number): Observable<MovieTrailer | null> {
     return this.memo(`trailer:${id}`, () =>
-      this.get(`/movie/${id}/videos`).pipe(map(parseTrailer)),
+      this.get(`/movies/${id}/videos`).pipe(map(parseTrailer)),
     );
   }
 
   /** Up to 12 films TMDB recommends for this title. */
   recommendations(id: number): Observable<readonly MovieSummary[]> {
     return this.memo(`recommendations:${id}`, () =>
-      this.get(`/movie/${id}/recommendations`).pipe(
+      this.get(`/movies/${id}/recommendations`).pipe(
         map((body) => parseMoviePage(body).movies.slice(0, 12)),
       ),
     );
@@ -128,7 +126,7 @@ export class Tmdb {
   /** Up to 12 films TMDB marks as similar. */
   similar(id: number): Observable<readonly MovieSummary[]> {
     return this.memo(`similar:${id}`, () =>
-      this.get(`/movie/${id}/similar`).pipe(
+      this.get(`/movies/${id}/similar`).pipe(
         map((body) => parseMoviePage(body).movies.slice(0, 12)),
       ),
     );
@@ -136,7 +134,7 @@ export class Tmdb {
 
   /** Official movie genres. Ids match the nine genres FRAME browses. */
   genres(): Observable<ReadonlyMap<number, string>> {
-    return this.memo('genre-names', () => this.get('/genre/movie/list').pipe(map(parseGenreMap)));
+    return this.memo('genre-names', () => this.get('/genres').pipe(map(parseGenreMap)));
   }
 
   private withGenreNames(movie: MovieSummary, names: ReadonlyMap<number, string>): MovieSummary {
@@ -157,9 +155,10 @@ export class Tmdb {
       return throwError(() => new TmdbConfigError());
     }
 
-    return this.http.get<unknown>(`${environment.tmdb.baseUrl}${path}`, {
-      params: { language: 'en-US', include_adult: false, ...params },
-    });
+    const base = environment.apiBaseUrl.replace(/\/$/, '');
+    const resource = path.startsWith('/') ? path : `/${path}`;
+
+    return this.http.get<unknown>(`${base}${resource}`, { params });
   }
 
   private memo<T>(key: string, create: () => Observable<T>): Observable<T> {
@@ -179,14 +178,4 @@ export class Tmdb {
     this.cache.set(key, request);
     return request;
   }
-}
-
-function sortParams(sort: GenreSort): Record<string, string | number | boolean> {
-  if (sort === 'latest') {
-    return { sort_by: 'primary_release_date.desc' };
-  }
-  if (sort === 'top-rated') {
-    return { sort_by: 'vote_average.desc', 'vote_count.gte': 200 };
-  }
-  return { sort_by: 'popularity.desc' };
 }

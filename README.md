@@ -33,16 +33,29 @@ The browser loads the Angular app and calls the Laravel REST API. Laravel authen
 ```mermaid
 flowchart LR
   browser[Browser]
-  pages[Cloudflare Pages]
-  api[Laravel on Hetzner]
-  db[(MySQL)]
+
+  subgraph cloudflare[Cloudflare]
+    direction TB
+    dns[Cloudflare DNS]
+    pages[Cloudflare Pages<br/>Angular frontend]
+  end
+
+  subgraph hetzner[Hetzner server]
+    direction TB
+    laravel[Laravel · PHP 8.5<br/>auth, wishlists, TMDB, cache]
+    mysql[(MySQL)]
+  end
+
+  ploi[Ploi.io<br/>management and deployments]
   tmdb[TMDB API]
 
-  browser --> pages
-  browser --> api
-  browser --> tmdb
-  api --> db
-  api --> tmdb
+  dns -.->|wexo.kevinmm.dk| pages
+  dns -.->|wexoapi.kevinmm.dk| laravel
+  browser -->|loads the frontend over HTTPS| pages
+  browser -->|HTTPS REST API| laravel
+  laravel -->|database connection| mysql
+  laravel -->|movie data over HTTPS| tmdb
+  ploi -.->|manages and deploys| hetzner
 ```
 
 ## Hosting

@@ -64,10 +64,41 @@ flowchart LR
 
 **Backend.** Laravel runs on a Hetzner server managed with Ploi.io, including the site configuration and deployments. The server runs a web server with PHP 8.5. MySQL is on the same server. The API is https://wexoapi.kevinmm.dk.
 
+## Deployment
+
+A push to `main` deploys the Laravel API only when files under `backend/` change. GitHub Actions sends a POST request to the Ploi deploy webhook. Ploi then runs its deployment script on the Hetzner server. The webhook URL is not stored in the repository.
+
+The workflow is `.github/workflows/deploy-backend.yml`. It listens for pushes to `main` with the path filter `backend/**`. The job runs on `ubuntu-latest` and calls the webhook with `curl`. The URL comes from the Actions secret `PLOI_DEPLOY_WEBHOOK`.
+
+Pushing to `main` is what starts a deployment. These changes start one:
+
+- Any file under `backend/**`
+
+These changes do not:
+
+- `frontend/**`
+- `docs/**`
+- Root files, such as this README
+
+Ploi.io holds the server connection and the deployment script. Hetzner is the machine that script updates. This repository does not define that script.
+
+```mermaid
+flowchart LR
+  push[Push to main]
+  actions[GitHub Actions<br/>deploy-backend.yml]
+  ploi[Ploi deploy webhook]
+  hetzner[Hetzner server<br/>Laravel API]
+
+  push -->|backend/** changed| actions
+  actions -->|POST using PLOI_DEPLOY_WEBHOOK| ploi
+  ploi -->|runs the deployment script| hetzner
+```
+
 ## Project structure
 
 ```text
 /
+├── .github/workflows/deploy-backend.yml
 ├── frontend/          Angular application
 ├── backend/           Laravel application
 │   └── .ddev/         DDEV configuration

@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal, untracked } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -43,6 +43,7 @@ export class MovieDetail {
   protected readonly formatVote = formatVote;
   protected readonly languageName = languageName;
   protected readonly tab = signal<DetailTab>('overview');
+  protected readonly overviewOpen = signal(false);
 
   protected readonly movie = rxResource({
     params: () => Number(this.id()),
@@ -75,6 +76,20 @@ export class MovieDetail {
       const film = this.shownFilm();
       this.title.setTitle(film ? `${film.title} · FRAME` : 'Film · FRAME');
     });
+
+    effect(() => {
+      this.id();
+      untracked(() => this.overviewOpen.set(false));
+    });
+  }
+
+  protected toggleOverview(): void {
+    this.overviewOpen.update((open) => !open);
+  }
+
+  /** Short blurbs already fit the mobile clamp, so they do not need a toggle. */
+  protected overviewCanExpand(overview: string): boolean {
+    return overview.length > 160;
   }
 
   protected selectTab(tab: DetailTab): void {

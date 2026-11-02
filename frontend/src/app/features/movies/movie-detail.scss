@@ -2,6 +2,42 @@
   display: block;
 }
 
+/* The intro only groups the title and metadata. Its own gap matches the hero copy,
+   so desktop spacing stays the same while mobile can place this pair beside the poster. */
+.detail-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detail-hero__copy > .detail-intro {
+  animation: none;
+}
+
+.detail-intro > * {
+  animation: rise var(--transition-duration-enter) var(--ease-frame) both;
+}
+
+.detail-intro > :nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.detail-hero__copy > .detail-genres {
+  animation-delay: 140ms;
+}
+
+.detail-hero__copy > .detail-tagline {
+  animation-delay: 210ms;
+}
+
+.detail-hero__copy > .detail-hero__overview {
+  animation-delay: 280ms;
+}
+
+.detail-hero__copy > .detail-actions {
+  animation-delay: 350ms;
+}
+
 .watch-card {
   display: inline-flex;
   max-width: 100%;
@@ -24,49 +60,296 @@
   object-fit: cover;
 }
 
-/* On a phone the document stays put. The panel under the hero is the only vertical scroller,
-   so the cast list, overview facts, and similar films stay reachable. */
+/* Phones get a shorter cinematic hero and a normal document scroll.
+   Tablet and desktop keep the shared hero rules in the global stylesheet. */
 @media (max-width: 767px) {
-  :host {
-    position: fixed;
-    z-index: 1;
-    top: calc(4.5rem + 1px + env(safe-area-inset-top, 0px));
-    right: 0;
-    bottom: env(safe-area-inset-bottom, 0px);
-    left: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  .detail-shell {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding-top: 0;
+    padding-inline: var(--gutter);
   }
 
-  .detail-shell,
-  .detail {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
+  .detail,
+  .detail-panel,
+  .detail-panel > *,
+  .detail-intro,
+  .detail-genres,
+  .detail-tagline,
+  .detail-hero__overview,
+  .detail-actions,
+  .cast-row,
+  .tabs {
     min-width: 0;
-    min-height: 0;
-    overflow: hidden;
+    max-width: 100%;
   }
 
   .detail-hero,
-  .tabs {
-    flex: 0 0 auto;
-  }
-
-  /* The panel is the vertical scroller. min-width: 0 lets the portrait
-     row stay inside it and keep its own horizontal scroll. */
-  .detail-panel {
-    flex: 1 1 auto;
-    min-width: 0;
+  .detail-hero.skeleton {
     min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    margin-inline: calc(var(--gutter) * -1);
+    overflow: hidden;
+    border-radius: 0;
+    background: transparent;
   }
 
-  .detail-panel > *,
-  .cast-row {
+  .detail-hero.skeleton {
+    min-height: 16rem;
+  }
+
+  .detail-hero__media,
+  .detail-hero__shade {
+    inset: 0 0 auto;
+    height: 12.5rem;
+  }
+
+  .detail-hero__shade {
+    background: linear-gradient(
+      180deg,
+      rgb(11 11 15 / 0.28) 0%,
+      rgb(11 11 15 / 0.04) 40%,
+      rgb(11 11 15 / 0.62) 76%,
+      var(--color-canvas) 100%
+    );
+  }
+
+  .detail-hero__layout {
+    display: grid;
+    grid-template-columns: 5.35rem minmax(0, 1fr);
+    align-items: end;
+    gap: 0.55rem 0.75rem;
+    min-height: 0;
+    padding: 7.35rem var(--gutter) 0.15rem;
+  }
+
+  .detail-hero__poster {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    box-shadow: 0 12px 28px rgb(0 0 0 / 0.42);
+  }
+
+  .detail-hero__copy {
+    display: contents;
+  }
+
+  .detail-intro {
+    grid-column: 2;
+    grid-row: 1;
+    gap: 0.35rem;
+    align-self: end;
+    padding-bottom: 0.15rem;
+  }
+
+  .detail-intro h1 {
+    font-size: clamp(1.35rem, 5.5vw, 1.7rem);
+    line-height: 1.05;
+  }
+
+  .detail-genres,
+  .detail-tagline,
+  .detail-hero__overview,
+  .overview-toggle,
+  .detail-actions {
+    grid-column: 1 / -1;
+  }
+
+  .detail-meta {
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    line-height: 1.2;
+  }
+
+  .detail-genres {
+    gap: 0.35rem;
+  }
+
+  .detail-genres a {
+    min-height: 1.45rem;
+    padding: 0 0.5rem;
+    font-size: 0.72rem;
+  }
+
+  .detail-tagline {
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+
+  .detail-hero__overview {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .detail-hero__overview.is-expanded {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+
+  .overview-toggle {
+    justify-self: start;
+    margin-top: -0.15rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+  }
+
+  .detail-actions {
+    gap: 0.45rem;
+    margin-top: 0.05rem;
+  }
+
+  .detail-actions > button,
+  .detail-actions > a {
+    min-height: 2.5rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.82rem;
+  }
+
+  .tabs {
+    gap: 0.7rem;
+    margin: 0.85rem 0 0.7rem;
+  }
+
+  .tabs button {
+    padding: 0.45rem 0;
+    font-size: clamp(0.72rem, 3.15vw, 0.84rem);
+    white-space: nowrap;
+  }
+
+  .tabs button[aria-selected='true'] {
+    font-weight: 600;
+  }
+
+  .detail-panel {
+    gap: 1.05rem;
+  }
+
+  .detail-panel h2 {
+    font-size: 1.05rem;
+  }
+
+  .watch-groups {
+    gap: 0.65rem;
+    margin-top: 0.5rem;
+  }
+
+  .watch-block {
+    gap: 0.3rem;
+  }
+
+  .watch-block h3 {
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+  }
+
+  .watch-block h3::before {
+    content: '';
+    display: inline-block;
+    width: 0.38rem;
+    height: 0.38rem;
+    margin-right: 0.35rem;
+    border-radius: 999px;
+    background: var(--color-accent);
+    vertical-align: 0.05em;
+  }
+
+  .watch-block[data-offer='rent'] h3::before {
+    background: #c4b5fd;
+  }
+
+  .watch-block[data-offer='buy'] h3::before {
+    background: #ddd6fe;
+  }
+
+  .watch-row {
+    gap: 0.4rem;
+  }
+
+  .watch-card {
+    width: 2.15rem;
+    height: 2.15rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .watch-card img {
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 0.45rem;
+  }
+
+  .watch-card:has(img) .watch-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .watch-card:not(:has(img)) {
+    width: auto;
+    height: auto;
+    padding: 0.15rem 0.45rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    font-size: 0.72rem;
+  }
+
+  .watch-credit {
+    margin-top: 0.4rem;
+    font-size: 0.68rem;
+  }
+
+  .watch-credit a {
+    color: var(--color-muted);
+  }
+
+  .detail-facts {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem 0.9rem;
+  }
+
+  .detail-facts > div {
     min-width: 0;
+  }
+
+  .detail-facts dd {
+    overflow-wrap: break-word;
+  }
+
+  .cast-row {
+    margin-top: 0.55rem;
+    gap: 0.6rem;
+    grid-auto-columns: 5.5rem;
+    scrollbar-width: none;
+  }
+
+  .cast-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cast-panel {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem 0.5rem;
+    margin-top: 0.1rem;
+  }
+
+  .person__fallback {
+    min-height: 0;
   }
 }

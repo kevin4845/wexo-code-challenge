@@ -40,8 +40,9 @@
             }
           </div>
           <div class="detail-hero__copy">
-            <h1>{{ film.title }}</h1>
-            <p class="flex flex-wrap items-center gap-[0.45rem] text-muted">
+            <div class="detail-intro">
+              <h1>{{ film.title }}</h1>
+              <p class="detail-meta flex flex-wrap items-center gap-[0.45rem] text-muted">
               @if (film.releaseYear) {
                 <span>{{ film.releaseYear }}</span>
               }
@@ -54,9 +55,10 @@
                   >{{ rating }}</span
                 >
               }
-            </p>
+              </p>
+            </div>
             @if (film.genres.length > 0) {
-              <p class="flex flex-wrap items-center gap-[0.45rem] text-muted">
+              <p class="detail-genres flex flex-wrap items-center gap-[0.45rem] text-muted">
                 @for (genre of film.genres; track genre.id) {
                   <a
                     class="inline-flex min-h-[1.7rem] items-center rounded-full border border-line-strong px-[0.65rem] py-[0.1rem] text-[0.82rem] text-ink no-underline"
@@ -67,12 +69,24 @@
               </p>
             }
             @if (film.tagline) {
-              <p class="text-[1.05rem] text-accent">{{ film.tagline }}</p>
+              <p class="detail-tagline text-[1.05rem] text-accent">{{ film.tagline }}</p>
             }
             @if (film.overview) {
-              <p class="detail-hero__overview">{{ film.overview }}</p>
+              <p class="detail-hero__overview" [class.is-expanded]="overviewOpen()">
+                {{ film.overview }}
+              </p>
+              @if (overviewCanExpand(film.overview)) {
+                <button
+                  type="button"
+                  class="overview-toggle md:hidden"
+                  [attr.aria-expanded]="overviewOpen()"
+                  (click)="toggleOverview()"
+                >
+                  {{ overviewOpen() ? 'Show less' : 'Read more' }}
+                </button>
+              }
             }
-            <div class="mt-[0.4rem] flex flex-wrap items-center gap-[0.7rem]">
+            <div class="detail-actions mt-[0.4rem] flex flex-wrap items-center gap-[0.7rem]">
               <button
                 type="button"
                 class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-[0.45rem] rounded-full border border-transparent bg-accent-strong px-[1.15rem] py-[0.55rem] font-semibold text-ink transition duration-frame ease-frame hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent-strong)_42%,transparent)] active:translate-y-0"
@@ -138,22 +152,25 @@
           role="tabpanel"
         >
           @if (watchOffer()) {
-            <section class="min-w-0 md:col-span-2" aria-labelledby="watch-heading">
+            <section
+              class="watch-section min-w-0 md:col-span-2"
+              aria-labelledby="watch-heading"
+            >
               <h2 id="watch-heading">Where to watch</h2>
-              <div class="mt-[0.85rem] grid gap-4">
+              <div class="watch-groups mt-[0.85rem] grid gap-4">
                 @for (category of watchCategories(); track category.id) {
-                  <div class="grid gap-2">
+                  <div class="watch-block grid gap-2" [attr.data-offer]="category.id">
                     <h3 class="text-[0.78rem] tracking-[0.04em] text-muted uppercase">
                       {{ category.label }}
                     </h3>
-                    <ul class="m-0 flex list-none flex-wrap gap-2 p-0">
+                    <ul class="watch-row m-0 flex list-none flex-wrap gap-2 p-0">
                       @for (provider of category.providers; track provider.id) {
                         <li>
                           <span class="watch-card">
                             @if (providerLogo(provider.logoPath); as logo) {
                               <img [src]="logo" [alt]="" width="92" height="92" loading="lazy" />
                             }
-                            <span>{{ provider.name }}</span>
+                            <span class="watch-name">{{ provider.name }}</span>
                           </span>
                         </li>
                       }
@@ -161,7 +178,7 @@
                   </div>
                 }
               </div>
-              <p class="mt-[0.85rem] text-[0.78rem] text-muted">
+              <p class="watch-credit mt-[0.85rem] text-[0.78rem] text-muted">
                 Streaming data by
                 <a
                   class="text-ink underline underline-offset-2 hover:text-accent"
@@ -209,7 +226,7 @@
               </div>
             }
           </section>
-          <dl class="m-0 grid content-start gap-[0.85rem]">
+          <dl class="detail-facts m-0 grid content-start gap-[0.85rem]">
             @if (directorName(); as director) {
               <div class="grid gap-[0.15rem]">
                 <dt class="text-[0.78rem] tracking-[0.04em] text-muted uppercase">Director</dt>
@@ -250,7 +267,7 @@
         </div>
       } @else if (tab() === 'cast') {
         <section
-          class="detail-panel mt-[0.9rem] grid gap-x-3 gap-y-4 md:grid-cols-6"
+          class="detail-panel cast-panel mt-[0.9rem] grid gap-x-3 gap-y-4 md:grid-cols-6"
           role="tabpanel"
           aria-labelledby="full-cast"
         >

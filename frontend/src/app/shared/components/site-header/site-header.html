@@ -59,6 +59,46 @@
         <app-icon name="heart" />
         <span class="max-md:sr-only">Wishlist</span>
       </a>
+      @if (account(); as user) {
+        <div #accountRoot class="relative">
+          <button
+            type="button"
+            class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-0 bg-transparent px-[0.35rem] text-ink"
+            [attr.aria-expanded]="accountOpen()"
+            aria-haspopup="menu"
+            aria-controls="account-menu"
+            (click)="toggleAccount()"
+          >
+            <span
+              class="inline-flex size-8 items-center justify-center rounded-full bg-accent-strong text-xs font-semibold"
+              aria-hidden="true"
+              >{{ initials(user.name) }}</span
+            >
+            <span class="max-md:sr-only">{{ user.name }}</span>
+          </button>
+          @if (accountOpen()) {
+            <div
+              id="account-menu"
+              class="absolute right-0 top-full z-20 mt-2 min-w-40 rounded-md border border-line bg-surface p-2 shadow-poster"
+              role="menu"
+            >
+              <button
+                type="button"
+                class="min-h-11 w-full cursor-pointer rounded-sm border-0 bg-transparent px-3 text-left text-ink hover:bg-accent/12"
+                role="menuitem"
+                (click)="logout()"
+              >
+                Log out
+              </button>
+              @if (accountError()) {
+                <p class="px-3 pb-2 text-[0.85rem] text-accent" role="alert">
+                  {{ accountError() }}
+                </p>
+              }
+            </div>
+          }
+        </div>
+      }
       <button
         type="button"
         class="hidden size-11 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-ink max-md:inline-flex"

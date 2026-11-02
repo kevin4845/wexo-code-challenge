@@ -1,11 +1,13 @@
 import type { AppEnvironment } from './environment.model';
 
 /**
- * Local development talks to the DDEV Laravel app.
- * Production builds use `/api` unless the API is hosted on another origin.
+ * Local development uses `/api`. `npm start` proxies that path, plus
+ * `/sanctum`, `/login`, `/register`, and `/logout`, to the DDEV app.
+ * A sibling production API uses an absolute origin, for example
+ * `https://api.frame.example/api`.
  */
 export const environment: AppEnvironment = {
   production: false,
-  apiBaseUrl: 'https://frame-backend.ddev.site/api',
+  apiBaseUrl: '/api',
   imageBaseUrl: 'https://image.tmdb.org/t/p',
 };

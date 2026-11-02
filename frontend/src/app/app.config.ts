@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
@@ -12,6 +12,7 @@ import {
 } from '@angular/router';
 
 import { routes } from './app.routes';
+import { sanctumInterceptor } from './core/interceptors/sanctum';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -30,6 +31,12 @@ export const appConfig: ApplicationConfig = {
         },
       }),
     ),
-    provideHttpClient(),
+    provideHttpClient(
+      withXsrfConfiguration({
+        cookieName: 'XSRF-TOKEN',
+        headerName: 'X-XSRF-TOKEN',
+      }),
+      withInterceptors([sanctumInterceptor]),
+    ),
   ],
 };

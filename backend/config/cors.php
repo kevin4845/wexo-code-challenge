@@ -7,20 +7,20 @@ $origins = array_values(array_filter(array_map(
 
 return [
 
-    'paths' => ['api/*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'register', 'logout'],
 
-    'allowed_methods' => ['GET', 'OPTIONS'],
+    'allowed_methods' => ['GET', 'POST', 'OPTIONS'],
 
     'allowed_origins' => $origins,
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['Accept', 'Content-Type', 'X-Requested-With'],
+    'allowed_headers' => ['Accept', 'Content-Type', 'X-Requested-With', 'X-XSRF-TOKEN'],
 
     'exposed_headers' => [],
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

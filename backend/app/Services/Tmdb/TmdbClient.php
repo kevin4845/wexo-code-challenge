@@ -28,6 +28,8 @@ class TmdbClient
             'include_adult' => 'false',
         ], $query);
 
+        // Prefer the read token, sent as a bearer header. The API key is only
+        // added to the query when no token is configured.
         if ($token === '') {
             $query['api_key'] = $apiKey;
         }
@@ -39,6 +41,7 @@ class TmdbClient
 
         ksort($query);
 
+        // Sort the query so two equivalent requests share one cache entry.
         $cacheKey = 'tmdb.'.sha1($path.'?'.http_build_query($query));
         $cached = Cache::get($cacheKey);
 
@@ -61,6 +64,7 @@ class TmdbClient
         }
 
         if ($response->failed()) {
+            // Upstream bodies can contain the request URL, so they are never cached or returned.
             throw new TmdbException($this->publicMessage($response), $this->publicStatus($response));
         }
 
@@ -94,6 +98,7 @@ class TmdbClient
     {
         return match ($sort) {
             'latest' => ['sort_by' => 'primary_release_date.desc'],
+            // A minimum vote count keeps a handful of ratings from outranking established films.
             'top-rated' => ['sort_by' => 'vote_average.desc', 'vote_count.gte' => 200],
             default => ['sort_by' => 'popularity.desc'],
         };

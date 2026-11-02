@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 
+// Catalogue routes below stay public. A wishlist is always the signed-in user's.
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/wishlist', [WishlistController::class, 'index']);
     Route::post('/wishlist', [WishlistController::class, 'store']);

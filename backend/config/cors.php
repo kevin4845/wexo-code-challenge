@@ -7,6 +7,7 @@ $origins = array_values(array_filter(array_map(
 
 return [
 
+    // Login and CSRF live outside /api, but the browser still calls them with credentials.
     'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'register', 'logout'],
 
     'allowed_methods' => ['GET', 'POST', 'OPTIONS'],
@@ -21,6 +22,7 @@ return [
 
     'max_age' => 0,
 
+    // Credentials require a specific origin. An empty allow-list matches no browser.
     'supports_credentials' => true,
 
 ];

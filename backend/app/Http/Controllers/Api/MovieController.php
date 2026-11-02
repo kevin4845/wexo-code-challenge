@@ -8,6 +8,9 @@ use App\Http\Requests\SearchMoviesRequest;
 use App\Services\Tmdb\TmdbClient;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Returns TMDB's own JSON. The Angular app already parses that shape, and image files are not proxied.
+ */
 class MovieController extends Controller
 {
     public function __construct(private readonly TmdbClient $tmdb) {}

@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Cookie sessions for the SPA. API requests are not authenticated with bearer tokens.
         $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $exceptions->render(function (TmdbException $exception, Request $request) {
+            // The exception message is already safe to show. The upstream response is not.
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json([
                     'message' => $exception->getMessage(),

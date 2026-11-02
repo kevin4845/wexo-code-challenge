@@ -11,6 +11,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * Authenticated by the web session guard. Sanctum uses that cookie,
+ * so this model does not issue personal access tokens.
+ */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -33,6 +37,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            // Plain passwords passed to create() or Auth::attempt() are hashed once by this cast.
             'password' => 'hashed',
         ];
     }

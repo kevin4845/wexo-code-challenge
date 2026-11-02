@@ -12,6 +12,10 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    /**
+     * Session cookie authentication for the first-party SPA.
+     * These actions never issue personal access tokens.
+     */
     public function user(Request $request): JsonResponse
     {
         return response()->json($this->payload($this->authenticated($request)));
@@ -21,11 +25,14 @@ class AuthController extends Controller
     {
         $user = User::query()->create([
             'name' => $request->string('name')->toString(),
+            // Stored lowercase so a later login matches regardless of the casing submitted here.
             'email' => $request->string('email')->lower()->toString(),
+            // The User model hashes this cast. Hashing it here would store a hash of a hash.
             'password' => $request->string('password')->toString(),
         ]);
 
         Auth::login($user);
+        // Replace the anonymous session id so a pre-login cookie cannot be reused.
         $request->session()->regenerate();
 
         return response()->json($this->payload($user), 201);
@@ -39,6 +46,7 @@ class AuthController extends Controller
         ];
 
         if (! Auth::attempt($credentials)) {
+            // The same message for an unknown email and a wrong password avoids confirming which accounts exist.
             throw ValidationException::withMessages([
                 'email' => ['These credentials do not match our records.'],
             ]);
@@ -54,6 +62,7 @@ class AuthController extends Controller
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
+        // The previous CSRF token belonged to the session that was just destroyed.
         $request->session()->regenerateToken();
 
         return response()->json(['message' => 'Logged out.']);
@@ -75,6 +84,7 @@ class AuthController extends Controller
      */
     private function payload(User $user): array
     {
+        // An explicit allow-list, so a later attribute on User cannot leak through this response.
         return [
             'id' => $user->id,
             'name' => $user->name,

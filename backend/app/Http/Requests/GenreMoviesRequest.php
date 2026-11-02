@@ -18,6 +18,7 @@ class GenreMoviesRequest extends FormRequest
     {
         return [
             ...$this->query(),
+            // Route parameters are not validated unless they are copied into this data.
             'genreId' => $this->route('genreId'),
         ];
     }
@@ -29,6 +30,7 @@ class GenreMoviesRequest extends FormRequest
     {
         return [
             'genreId' => ['required', 'integer', 'min:1'],
+            // TMDB rejects discover pages above 500.
             'page' => ['sometimes', 'integer', 'min:1', 'max:500'],
             'sort' => ['sometimes', 'string', 'in:popular,latest,top-rated'],
         ];

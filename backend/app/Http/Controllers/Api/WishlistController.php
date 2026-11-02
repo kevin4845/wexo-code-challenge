@@ -21,13 +21,16 @@ class WishlistController extends Controller
 
         foreach ($entries as $entry) {
             try {
+                // Details come from the shared TMDB client, which caches them. The row stores only the id.
                 $movies[] = $this->tmdb->get('/movie/'.$entry->tmdb_movie_id);
             } catch (TmdbException) {
+                // One unavailable title should not hide the rest of this user's list.
                 continue;
             }
         }
 
         return response()->json([
+            // Ids stay in the response even when a detail lookup was skipped, so the film remains saved.
             'ids' => $entries->pluck('tmdb_movie_id')->map(fn (mixed $id): int => (int) $id)->values(),
             'movies' => $movies,
         ]);
@@ -37,12 +40,14 @@ class WishlistController extends Controller
     {
         $user = $this->owner($request);
         $movieId = (int) $request->validated('tmdb_movie_id');
+        // Confirm the title exists before writing a row. A 404 from TMDB then saves nothing.
         $movie = $this->tmdb->get("/movie/{$movieId}");
 
         $entry = $user->wishlists()->firstOrCreate([
             'tmdb_movie_id' => $movieId,
         ]);
 
+        // A repeated save is the unique constraint doing its job, not a client error.
         return response()->json($movie, $entry->wasRecentlyCreated ? 201 : 200);
     }
 
@@ -62,6 +67,7 @@ class WishlistController extends Controller
 
     private function owner(Request $request): User
     {
+        // The session user is the only owner. A user id in the body or query is never read.
         $user = $request->user();
 
         if (! $user instanceof User) {

@@ -17,6 +17,7 @@ class StoreWishlistRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // No user id is accepted. The controller scopes the row to the session user.
             'tmdb_movie_id' => ['required', 'integer', 'min:1'],
         ];
     }

@@ -16,9 +16,10 @@ return [
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['Accept', 'Content-Type', 'X-Requested-With', 'X-XSRF-TOKEN'],
+    'allowed_headers' => ['Accept', 'Content-Type', 'X-Requested-With', 'X-XSRF-TOKEN', 'X-CSRF-TOKEN'],
 
-    'exposed_headers' => [],
+    // The SPA reads the token from this header. It cannot read the API host's cookie.
+    'exposed_headers' => ['X-CSRF-TOKEN'],
 
     'max_age' => 0,
 

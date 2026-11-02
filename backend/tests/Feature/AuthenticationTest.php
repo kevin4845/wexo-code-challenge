@@ -69,6 +69,20 @@ class AuthenticationTest extends TestCase
         $this->fromSpa()->getJson('/api/user')->assertUnauthorized();
     }
 
+    public function test_the_spa_origin_can_read_the_csrf_token_header(): void
+    {
+        $response = $this->withHeaders([
+            'Origin' => 'http://localhost:4200',
+        ])->get('/sanctum/csrf-cookie');
+
+        $response->assertNoContent();
+        $this->assertNotSame('', (string) $response->headers->get('X-CSRF-TOKEN'));
+        $this->assertStringContainsStringIgnoringCase(
+            'X-CSRF-TOKEN',
+            (string) $response->headers->get('Access-Control-Expose-Headers'),
+        );
+    }
+
     private function fromSpa(): static
     {
         $headers = [

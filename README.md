@@ -110,7 +110,7 @@ npm start
 
 On macOS or Linux, use `cp src/environments/environment.example.ts src/environments/environment.development.ts`.
 
-`npm start` runs `ng serve` at http://localhost:4200. The development server proxies `/api`, `/sanctum`, and `/logout`, plus `POST /login` and `POST /register`, to https://frame-backend.ddev.site. `GET /login` and `GET /register` stay in the Angular app. Keep `apiBaseUrl` as `/api` so those requests remain on localhost and the session cookie is first-party.
+`npm start` runs `ng serve` at http://localhost:4200. The browser calls https://frame-backend.ddev.site directly. Keep `apiBaseUrl` at that origin in `environment.development.ts`.
 
 Start DDEV before `npm start`.
 
@@ -118,4 +118,15 @@ Start DDEV before `npm start`.
 
 Secrets are not committed. `backend/.env` and `frontend/src/environments/environment.development.ts` are ignored. Copy the example files above and fill in local values only.
 
-`backend/.env.example` lists the database, session, Sanctum, CORS, and TMDB settings. Do not commit API tokens, the application key, or database passwords. The production frontend origin must be included in `CORS_ALLOWED_ORIGINS` and `SANCTUM_STATEFUL_DOMAINS` on the server. The production build reads `apiBaseUrl` from `frontend/src/environments/environment.ts`.
+`backend/.env.example` lists the database, session, Sanctum, CORS, and TMDB settings. Do not commit API tokens, the application key, or database passwords. The production build reads `apiBaseUrl` from `frontend/src/environments/environment.ts` (`https://wexoapi.kevinmm.dk/api`).
+
+Local DDEV and production use different cookie settings because localhost and `frame-backend.ddev.site` are different sites, while `wexo.kevinmm.dk` and `wexoapi.kevinmm.dk` are the same site. After changing the server `.env`, run `php artisan config:clear` there.
+
+| Setting | Local DDEV | Production |
+| --- | --- | --- |
+| `SESSION_DOMAIN` | `null` | `null` |
+| `SESSION_SECURE_COOKIE` | `true` | `true` |
+| `SESSION_SAME_SITE` | `none` | `lax` |
+| `SESSION_PARTITIONED_COOKIE` | `true` | `false` |
+| `SANCTUM_STATEFUL_DOMAINS` | `localhost,localhost:4200,127.0.0.1,127.0.0.1:4200` | `wexo.kevinmm.dk` |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:4200,http://127.0.0.1:4200` | `https://wexo.kevinmm.dk` |

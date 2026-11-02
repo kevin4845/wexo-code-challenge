@@ -70,8 +70,7 @@
               "buildTarget": "wexo-code-challenge:build:production"
             },
             "development": {
-              "buildTarget": "wexo-code-challenge:build:development",
-              "proxyConfig": "proxy.conf.js"
+              "buildTarget": "wexo-code-challenge:build:development"
             }
           },
           "defaultConfiguration": "development"

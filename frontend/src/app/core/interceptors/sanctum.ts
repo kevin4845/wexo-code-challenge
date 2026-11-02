@@ -1,8 +1,18 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpEvent, HttpInterceptorFn, HttpResponse } from '@angular/common/http';
+import { tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 
 const APP_PATHS = ['/api', '/sanctum', '/login', '/register', '/logout'];
+
+/** Plain session token from the API. The cross-origin cookie is not readable here. */
+let csrfToken: string | null = null;
+
+export function rememberCsrfToken(token: string | null): void {
+  if (token) {
+    csrfToken = token;
+  }
+}
 
 /** Origin of an absolute catalogue URL. Empty when the app uses relative paths. */
 export function apiOrigin(): string {
@@ -13,13 +23,13 @@ export function apiOrigin(): string {
   return '';
 }
 
-/** Same-origin path in development, or the configured API origin in production. */
+/** Relative path, or the configured API origin when the SPA and API are different hosts. */
 export function appUrl(path: string): string {
   const origin = apiOrigin();
   return origin === '' ? path : `${origin}${path}`;
 }
 
-function readXsrfToken(): string | null {
+function cookieXsrfToken(): string | null {
   const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
   const value = match?.[1];
   return value ? decodeURIComponent(value) : null;
@@ -43,12 +53,22 @@ export const sanctumInterceptor: HttpInterceptorFn = (request, next) => {
     return next(request);
   }
 
-  const token = readXsrfToken();
   const changing = request.method !== 'GET' && request.method !== 'HEAD';
-  const headers =
-    token && changing && !request.headers.has('X-XSRF-TOKEN')
-      ? request.headers.set('X-XSRF-TOKEN', token)
-      : request.headers;
+  let headers = request.headers;
+  if (changing && csrfToken && !headers.has('X-CSRF-TOKEN')) {
+    headers = headers.set('X-CSRF-TOKEN', csrfToken);
+  } else if (changing && !csrfToken && !headers.has('X-XSRF-TOKEN')) {
+    const encrypted = cookieXsrfToken();
+    if (encrypted) {
+      headers = headers.set('X-XSRF-TOKEN', encrypted);
+    }
+  }
 
-  return next(request.clone({ headers, withCredentials: true }));
+  return next(request.clone({ headers, withCredentials: true })).pipe(
+    tap((event: HttpEvent<unknown>) => {
+      if (event instanceof HttpResponse) {
+        rememberCsrfToken(event.headers.get('X-CSRF-TOKEN'));
+      }
+    }),
+  );
 };

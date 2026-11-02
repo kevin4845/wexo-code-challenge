@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ExposeCsrfToken;
 use App\Services\Tmdb\TmdbException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Cookie sessions for the SPA. API requests are not authenticated with bearer tokens.
         $middleware->statefulApi();
+        $middleware->append(ExposeCsrfToken::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { computed, inject, Service, signal } from '@angular/core';
 import { catchError, map, Observable, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
 
-import { appUrl } from '../interceptors/sanctum';
+import { appUrl, rememberCsrfToken } from '../interceptors/sanctum';
 
 export interface AuthUser {
   readonly id: number;
@@ -102,8 +102,15 @@ export class Auth {
 
   private ensureCsrf(): Observable<void> {
     return this.http
-      .get(appUrl('/sanctum/csrf-cookie'), { withCredentials: true, responseType: 'text' })
-      .pipe(map(() => undefined));
+      .get(appUrl('/sanctum/csrf-cookie'), {
+        withCredentials: true,
+        responseType: 'text',
+        observe: 'response',
+      })
+      .pipe(
+        tap((response) => rememberCsrfToken(response.headers.get('X-CSRF-TOKEN'))),
+        map(() => undefined),
+      );
   }
 }
 

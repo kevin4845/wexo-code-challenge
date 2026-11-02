@@ -2,8 +2,7 @@ import type { AppEnvironment } from './environment.model';
 
 /**
  * Production settings, used by `npm run build`.
- * `/api` is same-origin. When Laravel is on a sibling subdomain, set this
- * to that origin before building, for example `https://api.frame.example/api`.
+ * The API is the sibling host. Session cookies stay on that host.
  */
 export const environment: AppEnvironment = {
   production: true,

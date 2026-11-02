@@ -1,171 +1,108 @@
-# WEXO Code Challenge
+# FRAME
 
-Movie discovery application split into two apps in one repository.
+FRAME is a movie discovery application. The Angular frontend talks to a Laravel API. Movie data and images come from [The Movie Database (TMDB)](https://www.themoviedb.org/).
+
+Signed-in users can:
+
+- Browse movies and genres
+- Search for movies
+- Open a film for details, credits, and related titles
+- Save and remove films on a personal wishlist
+- Register and sign in
+
+## Tech stack
+
+| Area | Technologies |
+| --- | --- |
+| Frontend | Angular 22, TypeScript, Tailwind CSS, Angular Signals |
+| Backend | Laravel 13, PHP 8.4 locally (PHP 8.5 in production), Laravel Sanctum, MySQL 8.0, Laravel database cache |
+| External | TMDB API |
+| Infrastructure | Cloudflare Pages, Cloudflare DNS, Ploi.io, Hetzner, DDEV |
+
+Authentication uses Sanctum session cookies. The API does not use personal access tokens.
+
+## Architecture
+
+The browser loads the Angular app and calls the Laravel REST API. Laravel authenticates users, stores users and wishlists in MySQL, and requests movie data from TMDB. Successful TMDB responses are cached. Poster and backdrop files are loaded in the browser from TMDB's image host.
+
+| Environment | Frontend | API |
+| --- | --- | --- |
+| Production | https://wexo.kevinmm.dk | https://wexoapi.kevinmm.dk |
+| Local | http://localhost:4200 | https://frame-backend.ddev.site |
+
+```mermaid
+flowchart LR
+  browser[Browser]
+  pages[Cloudflare Pages]
+  api[Laravel on Hetzner]
+  db[(MySQL)]
+  tmdb[TMDB API]
+
+  browser --> pages
+  browser --> api
+  browser --> tmdb
+  api --> db
+  api --> tmdb
+```
+
+## Hosting
+
+**Frontend.** The Angular app is hosted on Cloudflare Pages. Cloudflare DNS serves the domain. The site is https://wexo.kevinmm.dk.
+
+**Backend.** Laravel runs on a Hetzner server managed with Ploi.io, including the site configuration and deployments. The server runs a web server with PHP 8.5. MySQL is on the same server. The API is https://wexoapi.kevinmm.dk.
+
+## Project structure
 
 ```text
-WEXO-CODE-CHALLENGE/
-├── frontend/     Angular application
-├── backend/      Laravel application
-├── docs/         Architecture and development notes
-├── .gitignore
+/
+├── frontend/          Angular application
+├── backend/           Laravel application
+│   └── .ddev/         DDEV configuration
+├── docs/              Architecture notes and development guidelines
 └── README.md
 ```
 
-Framework files stay inside the application they belong to. The Git history stays at the repository root.
+## Local development
 
-## Prerequisites
+DDEV runs only the Laravel app. From `backend/`, the project name is `frame-backend`, with PHP 8.4, nginx-fpm, and MySQL 8.0. Inside DDEV, MySQL is reached at host `db`. The credentials are the DDEV defaults in `backend/.env.example`.
 
-Frontend:
-
-- Node.js `^22.22.3`, `^24.15.0`, or `>=26.0.0`
-- npm 11. `frontend/package.json` sets `packageManager` to `npm@11.19.1`.
-
-Backend:
-
-- Docker Desktop
-- DDEV 1.25 or newer
-- The DDEV web container provides PHP 8.4 and Composer 2. Laravel 13 requires PHP `^8.3`.
-
-## Frontend
-
-Install dependencies:
-
-```bash
-cd frontend
-npm install
-```
-
-Start the development server:
-
-```bash
-cd frontend
-npm start
-```
-
-`npm start` runs `ng serve` with the development configuration. The app is at `http://localhost:4200/` unless that port is already in use. Stop the server with `Ctrl+C`.
-
-Production build:
-
-```bash
-cd frontend
-npm run build
-```
-
-Output is written to `frontend/dist/cloudflare/`. The files to serve are in `frontend/dist/cloudflare/browser/`.
-
-Other scripts, from `frontend/`:
-
-```bash
-npm run watch
-npm test
-npm run lint
-npm run format:check
-```
-
-`npm run watch` rebuilds the development configuration. It does not serve the app.
-
-The Angular app is standalone and zoneless, styled with Tailwind CSS and a small SCSS layer. `frontend/src/main.ts` bootstraps `App`. Routes, the catalogue client, and the browser wishlist live under `frontend/src/app/`. The browser calls Laravel. Laravel calls TMDB. Notes on the app structure are in [docs/architecture.md](docs/architecture.md) and [docs/development-guidelines.md](docs/development-guidelines.md). Those notes use paths inside the Angular app, so run the npm commands from `frontend/`.
-
-### Frontend environment
-
-| File                                                     | Role                                          |
-| -------------------------------------------------------- | --------------------------------------------- |
-| `frontend/src/environments/environment.model.ts`         | Shared type for the settings object           |
-| `frontend/src/environments/environment.ts`               | Production settings. Used by `npm run build`. |
-| `frontend/src/environments/environment.development.ts`   | Development settings. Used by `npm start`.    |
-
-Development uses the relative path `/api`. `npm start` proxies `/api`, `/sanctum`, and `/logout`, plus `POST /login` and `POST /register`, to `https://frame-backend.ddev.site`. `GET /login` and `GET /register` stay in the Angular app. The browser stays on `http://localhost:4200`, so the session cookie is first-party. Production uses `/api` when a reverse proxy on the frontend host forwards the API paths to Laravel and leaves `GET /login` and `GET /register` with the SPA. If Laravel is hosted on another origin, set `apiBaseUrl` in `environment.ts` to that origin before building, for example `https://api.frame.example/api`, and add the frontend origin to `CORS_ALLOWED_ORIGINS`.
-
-Poster and backdrop URLs are still built in the browser from `imageBaseUrl` (`https://image.tmdb.org/t/p`) and the path returned by the API. Image files are not proxied.
-
-`.gitignore` ignores `.env`, `.env.*` except `.env.example`, and `frontend/src/environments/*.local.ts`.
-
-## Backend
-
-Laravel runs in DDEV and proxies TMDB. The read access token and API key live only in `backend/.env`. The token is preferred. The API key is sent only when the token is empty.
-
-DDEV is configured in `backend/.ddev/` as project `frame-backend`, with PHP 8.4, nginx-fpm, and MySQL 8.0. Laravel connects to that database with host `db`, database `db`, username `db`, and password `db`.
-
-From `backend/`:
+### Backend
 
 ```bash
 cd backend
-
+copy .env.example .env
 ddev start
 ddev composer install
 ddev artisan key:generate
 ddev artisan migrate
 ```
 
-`ddev start` creates the project containers and prints the site URL. On a new checkout, copy the environment file before generating the key:
+On macOS or Linux, use `cp .env.example .env` instead of `copy`. Put a TMDB read access token in `TMDB_ACCESS_TOKEN`. Leave `TMDB_API_KEY` empty unless there is no token.
 
-```bash
-cd backend
-copy .env.example .env
-```
-
-On macOS or Linux, use `cp .env.example .env` instead of `copy`. `.env.example` is tracked. `.env` is ignored and must not be committed. Put the TMDB read access token in `TMDB_ACCESS_TOKEN`. Leave `TMDB_API_KEY` empty unless there is no token. `CORS_ALLOWED_ORIGINS` lists the browser origins allowed to call the API. The example database user and password are DDEV’s defaults.
-
-The application is at `https://frame-backend.ddev.site`. The API is under `https://frame-backend.ddev.site/api`.
-
-### Authentication
-
-FRAME uses Laravel Sanctum cookie authentication for the first-party SPA. The browser does not store the session in `localStorage` or `sessionStorage`.
-
-| Method | Path | Purpose |
-| ------ | ---- | ------- |
-| GET | `/sanctum/csrf-cookie` | Issue the CSRF cookie |
-| POST | `/register` | Create an account and start a session |
-| POST | `/login` | Start a session |
-| POST | `/logout` | End the session |
-| GET | `/api/user` | Read the signed-in user |
-
-Local DDEV settings in `backend/.env`:
-
-```dotenv
-SESSION_DOMAIN=null
-SESSION_SECURE_COOKIE=false
-SESSION_SAME_SITE=lax
-SANCTUM_STATEFUL_DOMAINS=localhost,localhost:4200,127.0.0.1,127.0.0.1:4200
-CORS_ALLOWED_ORIGINS=http://localhost:4200,http://127.0.0.1:4200
-```
-
-`SESSION_DOMAIN` stays empty locally because the Angular dev server proxies the API. `SESSION_SECURE_COOKIE` stays false because `http://localhost:4200` is not HTTPS.
-
-For production on a shared parent domain, such as `https://app.frame.example` and `https://api.frame.example`:
-
-```dotenv
-SESSION_DOMAIN=.frame.example
-SESSION_SECURE_COOKIE=true
-SESSION_SAME_SITE=lax
-SANCTUM_STATEFUL_DOMAINS=app.frame.example
-CORS_ALLOWED_ORIGINS=https://app.frame.example
-```
-
-`SESSION_DOMAIN` must start with a dot so the session cookie is sent to both subdomains. `SANCTUM_STATEFUL_DOMAINS` is the frontend host, without a scheme. Serve the site over HTTPS so the secure cookie is stored.
-
-If the built app keeps `apiBaseUrl` as `/api`, the frontend host must reverse-proxy `/api`, `/sanctum`, and `/logout`, and the `POST` requests for `/login` and `/register`, to Laravel. `GET /login` and `GET /register` must keep serving the Angular app. In that same-origin setup, `SESSION_DOMAIN` can stay empty and `SANCTUM_STATEFUL_DOMAINS` is the frontend host. Use the parent-domain values above when the browser calls the API host directly.
-
-### Wishlist
-
-Saved films belong to the signed-in user. The `wishlists` table stores the user and the TMDB movie id. Apply it from `backend/`:
-
-```bash
-ddev artisan migrate
-```
-
-| Method | Path | Purpose |
-| ------ | ---- | ------- |
-| GET | `/api/wishlist` | List the signed-in user's films |
-| POST | `/api/wishlist` | Save a film (`tmdb_movie_id`) |
-| GET | `/api/wishlist/{tmdbMovieId}` | Check whether that film is saved |
-| DELETE | `/api/wishlist/{tmdbMovieId}` | Remove that film |
-
-A film saved in this browser before the database wishlist is copied into the account on the next sign-in, then removed from `localStorage`.
-
-Stop DDEV:
+The API is at https://frame-backend.ddev.site. Stop it with:
 
 ```bash
 cd backend
 ddev stop
 ```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+copy src\environments\environment.example.ts src\environments\environment.development.ts
+npm start
+```
+
+On macOS or Linux, use `cp src/environments/environment.example.ts src/environments/environment.development.ts`.
+
+`npm start` runs `ng serve` at http://localhost:4200. The development server proxies `/api`, `/sanctum`, and `/logout`, plus `POST /login` and `POST /register`, to https://frame-backend.ddev.site. `GET /login` and `GET /register` stay in the Angular app. Keep `apiBaseUrl` as `/api` so those requests remain on localhost and the session cookie is first-party.
+
+Start DDEV before `npm start`.
+
+## Environment configuration
+
+Secrets are not committed. `backend/.env` and `frontend/src/environments/environment.development.ts` are ignored. Copy the example files above and fill in local values only.
+
+`backend/.env.example` lists the database, session, Sanctum, CORS, and TMDB settings. Do not commit API tokens, the application key, or database passwords. The production frontend origin must be included in `CORS_ALLOWED_ORIGINS` and `SANCTUM_STATEFUL_DOMAINS` on the server. The production build reads `apiBaseUrl` from `frontend/src/environments/environment.ts`.

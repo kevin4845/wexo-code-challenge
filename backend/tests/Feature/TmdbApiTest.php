@@ -118,6 +118,116 @@ class TmdbApiTest extends TestCase
         $this->getJson('/api/movies/search')->assertStatus(422);
     }
 
+    public function test_watch_providers_return_denmark_only_and_are_cached(): void
+    {
+        Http::fake([
+            'https://api.themoviedb.org/*' => Http::response([
+                'id' => 550,
+                'results' => [
+                    'US' => [
+                        'link' => 'https://www.themoviedb.org/movie/550/watch?locale=US',
+                        'flatrate' => [
+                            [
+                                'provider_id' => 8,
+                                'provider_name' => 'Netflix',
+                                'logo_path' => '/us.jpg',
+                                'display_priority' => 0,
+                            ],
+                        ],
+                    ],
+                    'DK' => [
+                        'link' => 'https://www.themoviedb.org/movie/550/watch?locale=DK',
+                        'flatrate' => [
+                            [
+                                'provider_id' => 119,
+                                'provider_name' => 'Amazon Prime Video',
+                                'logo_path' => '/prime.jpg',
+                                'display_priority' => 2,
+                            ],
+                            [
+                                'provider_id' => 2,
+                                'provider_name' => 'Apple TV',
+                                'logo_path' => 'https://evil.example/logo.jpg',
+                                'display_priority' => 1,
+                            ],
+                            [
+                                'provider_id' => 119,
+                                'provider_name' => 'Amazon Prime Video',
+                                'logo_path' => '/duplicate.jpg',
+                                'display_priority' => 0,
+                            ],
+                        ],
+                        'rent' => [
+                            ['provider_id' => 3, 'provider_name' => ' ', 'logo_path' => '/x.jpg'],
+                        ],
+                        'buy' => [],
+                        'ads' => [
+                            [
+                                'provider_id' => 99,
+                                'provider_name' => 'Tubi',
+                                'logo_path' => '/tubi.jpg',
+                                'display_priority' => 0,
+                            ],
+                        ],
+                    ],
+                ],
+            ]),
+        ]);
+
+        $response = $this->getJson('/api/movies/550/watch/providers')
+            ->assertOk()
+            ->assertJsonPath('link', 'https://www.themoviedb.org/movie/550/watch?locale=DK')
+            ->assertJsonPath('flatrate.0.provider_name', 'Amazon Prime Video')
+            ->assertJsonPath('flatrate.0.logo_path', '/duplicate.jpg')
+            ->assertJsonPath('flatrate.1.provider_name', 'Apple TV')
+            ->assertJsonPath('flatrate.1.logo_path', null)
+            ->assertJsonPath('rent', [])
+            ->assertJsonPath('buy', [])
+            ->assertJsonMissingPath('results');
+
+        $this->assertStringNotContainsString('Netflix', (string) $response->getContent());
+        $this->assertStringNotContainsString('Tubi', (string) $response->getContent());
+
+        $this->getJson('/api/movies/550/watch/providers')->assertOk();
+
+        Http::assertSentCount(1);
+        Http::assertSent(function ($request): bool {
+            return str_contains($request->url(), '/movie/550/watch/providers')
+                && ! str_contains($request->url(), 'api_key=');
+        });
+    }
+
+    public function test_watch_providers_are_empty_when_denmark_is_missing(): void
+    {
+        Http::fake([
+            'https://api.themoviedb.org/*' => Http::response([
+                'id' => 550,
+                'results' => [
+                    'US' => [
+                        'link' => 'javascript:alert(1)',
+                        'flatrate' => [
+                            [
+                                'provider_id' => 8,
+                                'provider_name' => 'Netflix',
+                                'logo_path' => '/us.jpg',
+                                'display_priority' => 0,
+                            ],
+                        ],
+                    ],
+                ],
+            ]),
+        ]);
+
+        $this->getJson('/api/movies/550/watch/providers')
+            ->assertOk()
+            ->assertExactJson([
+                'link' => null,
+                'flatrate' => [],
+                'rent' => [],
+                'buy' => [],
+            ]);
+    }
+
     public function test_cors_allows_only_configured_origins(): void
     {
         config([

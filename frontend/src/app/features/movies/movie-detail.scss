@@ -2,6 +2,28 @@
   display: block;
 }
 
+.watch-card {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.22rem 0.55rem 0.22rem 0.22rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: 0.82rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.watch-card img {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 /* On a phone the document stays put. The panel under the hero is the only vertical scroller,
    so the cast list, overview facts, and similar films stay reachable. */
 @media (max-width: 767px) {

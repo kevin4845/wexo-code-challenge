@@ -71,6 +71,27 @@ export interface MovieTrailer {
   readonly name: string;
 }
 
+export interface WatchProvider {
+  readonly id: number;
+  readonly name: string;
+  readonly logoPath: string | null;
+  readonly displayPriority: number;
+}
+
+export interface WatchAvailability {
+  readonly link: string | null;
+  readonly flatrate: readonly WatchProvider[];
+  readonly rent: readonly WatchProvider[];
+  readonly buy: readonly WatchProvider[];
+}
+
+export const EMPTY_WATCH: WatchAvailability = {
+  link: null,
+  flatrate: [],
+  rent: [],
+  buy: [],
+};
+
 export type GenreSort = 'popular' | 'latest' | 'top-rated';
 
 export const EMPTY_CREDITS: MovieCredits = {

@@ -27,5 +27,6 @@ Route::get('/movies/search', [MovieController::class, 'search']);
 Route::get('/movies/{movieId}', [MovieController::class, 'show'])->where('movieId', '[1-9][0-9]*');
 Route::get('/movies/{movieId}/credits', [MovieController::class, 'credits'])->where('movieId', '[1-9][0-9]*');
 Route::get('/movies/{movieId}/videos', [MovieController::class, 'videos'])->where('movieId', '[1-9][0-9]*');
+Route::get('/movies/{movieId}/watch/providers', [MovieController::class, 'watchProviders'])->where('movieId', '[1-9][0-9]*');
 Route::get('/movies/{movieId}/recommendations', [MovieController::class, 'recommendations'])->where('movieId', '[1-9][0-9]*');
 Route::get('/movies/{movieId}/similar', [MovieController::class, 'similar'])->where('movieId', '[1-9][0-9]*');

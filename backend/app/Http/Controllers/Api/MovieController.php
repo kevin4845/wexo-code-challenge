@@ -77,6 +77,113 @@ class MovieController extends Controller
     }
 
     /**
+     * Only Denmark is returned. The shared client still caches TMDB's full regional payload.
+     */
+    public function watchProviders(int $movieId): JsonResponse
+    {
+        return response()->json($this->denmarkProviders(
+            $this->tmdb->get("/movie/{$movieId}/watch/providers"),
+        ));
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array{
+     *     link: string|null,
+     *     flatrate: list<array{provider_id: int, provider_name: string, logo_path: string|null, display_priority: int}>,
+     *     rent: list<array{provider_id: int, provider_name: string, logo_path: string|null, display_priority: int}>,
+     *     buy: list<array{provider_id: int, provider_name: string, logo_path: string|null, display_priority: int}>
+     * }
+     */
+    private function denmarkProviders(array $payload): array
+    {
+        $results = $payload['results'] ?? null;
+        $region = is_array($results) ? ($results['DK'] ?? null) : null;
+
+        if (! is_array($region)) {
+            return [
+                'link' => null,
+                'flatrate' => [],
+                'rent' => [],
+                'buy' => [],
+            ];
+        }
+
+        return [
+            'link' => $this->watchLink($region['link'] ?? null),
+            'flatrate' => $this->providers($region['flatrate'] ?? null),
+            'rent' => $this->providers($region['rent'] ?? null),
+            'buy' => $this->providers($region['buy'] ?? null),
+        ];
+    }
+
+    /**
+     * Logos open the TMDB watch page, so a link to any other host is dropped.
+     */
+    private function watchLink(mixed $link): ?string
+    {
+        if (! is_string($link) || ! str_starts_with($link, 'https://www.themoviedb.org/')) {
+            return null;
+        }
+
+        return $link;
+    }
+
+    /**
+     * @return list<array{provider_id: int, provider_name: string, logo_path: string|null, display_priority: int}>
+     */
+    private function providers(mixed $providers): array
+    {
+        if (! is_array($providers)) {
+            return [];
+        }
+
+        $clean = [];
+
+        foreach ($providers as $provider) {
+            if (! is_array($provider)) {
+                continue;
+            }
+
+            $id = $provider['provider_id'] ?? null;
+            $name = $provider['provider_name'] ?? null;
+
+            if (! is_int($id) || $id < 1 || ! is_string($name) || trim($name) === '') {
+                continue;
+            }
+
+            $logo = $provider['logo_path'] ?? null;
+            $priority = $provider['display_priority'] ?? null;
+
+            $clean[] = [
+                'provider_id' => $id,
+                'provider_name' => trim($name),
+                'logo_path' => is_string($logo) && str_starts_with($logo, '/') ? $logo : null,
+                'display_priority' => is_int($priority) ? $priority : 1000,
+            ];
+        }
+
+        usort(
+            $clean,
+            static fn (array $left, array $right): int => $left['display_priority'] <=> $right['display_priority'],
+        );
+
+        $unique = [];
+        $seen = [];
+
+        foreach ($clean as $provider) {
+            if (isset($seen[$provider['provider_id']])) {
+                continue;
+            }
+
+            $seen[$provider['provider_id']] = true;
+            $unique[] = $provider;
+        }
+
+        return $unique;
+    }
+
+    /**
      * @return array<string, int>
      */
     private function pageQuery(PageRequest $request): array

@@ -137,6 +137,42 @@
           class="detail-panel grid gap-6 md:grid-cols-[minmax(0,1fr)_16rem] md:items-start"
           role="tabpanel"
         >
+          @if (watchOffer()) {
+            <section class="min-w-0 md:col-span-2" aria-labelledby="watch-heading">
+              <h2 id="watch-heading">Where to watch</h2>
+              <div class="mt-[0.85rem] grid gap-4">
+                @for (category of watchCategories(); track category.id) {
+                  <div class="grid gap-2">
+                    <h3 class="text-[0.78rem] tracking-[0.04em] text-muted uppercase">
+                      {{ category.label }}
+                    </h3>
+                    <ul class="m-0 flex list-none flex-wrap gap-2 p-0">
+                      @for (provider of category.providers; track provider.id) {
+                        <li>
+                          <span class="watch-card">
+                            @if (providerLogo(provider.logoPath); as logo) {
+                              <img [src]="logo" [alt]="" width="92" height="92" loading="lazy" />
+                            }
+                            <span>{{ provider.name }}</span>
+                          </span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+              <p class="mt-[0.85rem] text-[0.78rem] text-muted">
+                Streaming data by
+                <a
+                  class="text-ink underline underline-offset-2 hover:text-accent"
+                  href="https://www.justwatch.com/dk"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >JustWatch</a
+                >
+              </p>
+            </section>
+          }
           <section aria-labelledby="cast-heading">
             <h2 id="cast-heading">Cast &amp; Crew</h2>
             @if (credits.isLoading()) {

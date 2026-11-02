@@ -1,6 +1,7 @@
 import {
   EMPTY_CREDITS,
   EMPTY_MOVIE_PAGE,
+  EMPTY_WATCH,
   type CastMember,
   type CrewCredit,
   type MovieCredits,
@@ -8,6 +9,8 @@ import {
   type MoviePage,
   type MovieSummary,
   type MovieTrailer,
+  type WatchAvailability,
+  type WatchProvider,
 } from './models/movie';
 
 /**
@@ -276,4 +279,64 @@ export function parseTrailer(value: unknown): MovieTrailer | null {
     videos.find((video) => video.type === 'Teaser');
 
   return match ? { key: match.key, name: match.name } : null;
+}
+
+/** Denmark availability already shaped by Laravel. A bad payload hides the section. */
+export function parseWatchProviders(value: unknown): WatchAvailability {
+  const source = record(value);
+  if (!source) {
+    return EMPTY_WATCH;
+  }
+
+  return {
+    link: watchLink(text(source, 'link')),
+    flatrate: watchProviders(source['flatrate']),
+    rent: watchProviders(source['rent']),
+    buy: watchProviders(source['buy']),
+  };
+}
+
+function watchLink(link: string | null): string | null {
+  if (!link || !link.startsWith('https://www.themoviedb.org/')) {
+    return null;
+  }
+  return link;
+}
+
+function watchProviders(value: unknown): WatchProvider[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const providers = value.flatMap((item) => {
+    const source = record(item);
+    const id = source ? numeric(source, 'provider_id') : null;
+    const name = source ? text(source, 'provider_name') : null;
+    if (!source || id === null || id < 1 || !name) {
+      return [];
+    }
+
+    const logo = text(source, 'logo_path');
+    const priority = numeric(source, 'display_priority');
+
+    return [
+      {
+        id,
+        name,
+        logoPath: logo?.startsWith('/') ? logo : null,
+        displayPriority: priority ?? 1000,
+      },
+    ];
+  });
+
+  providers.sort((left, right) => left.displayPriority - right.displayPriority);
+
+  const seen = new Set<number>();
+  return providers.filter((provider) => {
+    if (seen.has(provider.id)) {
+      return false;
+    }
+    seen.add(provider.id);
+    return true;
+  });
 }

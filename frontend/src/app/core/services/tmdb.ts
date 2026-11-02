@@ -10,6 +10,7 @@ import {
   type MoviePage,
   type MovieSummary,
   type MovieTrailer,
+  type WatchAvailability,
 } from '../models/movie';
 import {
   parseCredits,
@@ -17,6 +18,7 @@ import {
   parseMovieDetails,
   parseMoviePage,
   parseTrailer,
+  parseWatchProviders,
 } from '../tmdb-map';
 import { TmdbConfigError } from './tmdb-auth';
 
@@ -104,6 +106,13 @@ export class Tmdb {
   credits(id: number): Observable<MovieCredits> {
     return this.memo(`credits:${id}`, () =>
       this.get(`/movies/${id}/credits`).pipe(map(parseCredits)),
+    );
+  }
+
+  /** Where the film can be streamed, rented, or bought in Denmark. */
+  watchProviders(id: number): Observable<WatchAvailability> {
+    return this.memo(`watch:${id}`, () =>
+      this.get(`/movies/${id}/watch/providers`).pipe(map(parseWatchProviders)),
     );
   }
 

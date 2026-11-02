@@ -1,4 +1,4 @@
-import { parseMovie, parseMoviePage, parseTrailer } from './tmdb-map';
+import { parseMovie, parseMoviePage, parseTrailer, parseWatchProviders } from './tmdb-map';
 
 describe('tmdb response mapping', () => {
   it('drops films that have no title and treats an unrated score as missing', () => {
@@ -53,5 +53,34 @@ describe('tmdb response mapping', () => {
     });
 
     expect(trailer).toEqual({ key: 'trailer', name: 'Official trailer' });
+  });
+
+  it('keeps Denmark watch providers and drops a link that is not the TMDB page', () => {
+    const offer = parseWatchProviders({
+      link: 'https://example.com/watch',
+      flatrate: [
+        {
+          provider_id: 2,
+          provider_name: 'Apple TV',
+          logo_path: '/apple.jpg',
+          display_priority: 2,
+        },
+        {
+          provider_id: 8,
+          provider_name: 'Netflix',
+          logo_path: 'https://evil.example/logo.jpg',
+          display_priority: 0,
+        },
+        { provider_id: 8, provider_name: 'Netflix again', display_priority: 1 },
+      ],
+      rent: [{ provider_id: 3 }],
+      buy: [],
+    });
+
+    expect(offer.link).toBeNull();
+    expect(offer.flatrate.map((provider) => provider.name)).toEqual(['Netflix', 'Apple TV']);
+    expect(offer.flatrate[0]?.logoPath).toBeNull();
+    expect(offer.rent).toEqual([]);
+    expect(offer.buy).toEqual([]);
   });
 });

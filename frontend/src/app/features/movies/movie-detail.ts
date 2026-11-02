@@ -9,6 +9,8 @@ import {
   type CastMember,
   type MovieDetails,
   type MovieSummary,
+  type WatchAvailability,
+  type WatchProvider,
 } from '../../core/models/movie';
 import { catalogueErrorCopy, tmdbConfigMessage } from '../../core/services/tmdb-auth';
 import { Tmdb } from '../../core/services/tmdb';
@@ -55,6 +57,11 @@ export class MovieDetail {
   protected readonly trailer = rxResource({
     params: () => Number(this.id()),
     stream: ({ params }) => this.tmdb.trailer(params),
+  });
+
+  protected readonly providers = rxResource({
+    params: () => Number(this.id()),
+    stream: ({ params }) => this.tmdb.watchProviders(params),
   });
 
   protected readonly similar = rxResource({
@@ -129,5 +136,40 @@ export class MovieDetail {
 
   protected portraitUrl(path: string | null): string | null {
     return displayImage(path, 'w185');
+  }
+
+  protected providerLogo(path: string | null): string | null {
+    return displayImage(path, 'w92');
+  }
+
+  /** Hidden when Denmark has no streaming, rental, or purchase offer. */
+  protected watchOffer(): WatchAvailability | null {
+    if (!this.providers.hasValue()) {
+      return null;
+    }
+
+    const offer = this.providers.value();
+    if (offer.flatrate.length + offer.rent.length + offer.buy.length === 0) {
+      return null;
+    }
+
+    return offer;
+  }
+
+  protected watchCategories(): readonly {
+    id: string;
+    label: string;
+    providers: readonly WatchProvider[];
+  }[] {
+    const offer = this.watchOffer();
+    if (!offer) {
+      return [];
+    }
+
+    return [
+      { id: 'flatrate', label: 'Now Streaming', providers: offer.flatrate },
+      { id: 'rent', label: 'Rent', providers: offer.rent },
+      { id: 'buy', label: 'Buy', providers: offer.buy },
+    ].filter((category) => category.providers.length > 0);
   }
 }

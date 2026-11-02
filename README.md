@@ -146,6 +146,23 @@ CORS_ALLOWED_ORIGINS=https://app.frame.example
 
 If the built app keeps `apiBaseUrl` as `/api`, the frontend host must reverse-proxy `/api`, `/sanctum`, and `/logout`, and the `POST` requests for `/login` and `/register`, to Laravel. `GET /login` and `GET /register` must keep serving the Angular app. In that same-origin setup, `SESSION_DOMAIN` can stay empty and `SANCTUM_STATEFUL_DOMAINS` is the frontend host. Use the parent-domain values above when the browser calls the API host directly.
 
+### Wishlist
+
+Saved films belong to the signed-in user. The `wishlists` table stores the user and the TMDB movie id. Apply it from `backend/`:
+
+```bash
+ddev artisan migrate
+```
+
+| Method | Path | Purpose |
+| ------ | ---- | ------- |
+| GET | `/api/wishlist` | List the signed-in user's films |
+| POST | `/api/wishlist` | Save a film (`tmdb_movie_id`) |
+| GET | `/api/wishlist/{tmdbMovieId}` | Check whether that film is saved |
+| DELETE | `/api/wishlist/{tmdbMovieId}` | Remove that film |
+
+A film saved in this browser before the database wishlist is copied into the account on the next sign-in, then removed from `localStorage`.
+
 Stop DDEV:
 
 ```bash

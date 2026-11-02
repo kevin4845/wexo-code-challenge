@@ -2,10 +2,18 @@
 
 use App\Http\Controllers\Api\GenreController;
 use App\Http\Controllers\Api\MovieController;
+use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+
+Route::middleware('auth:sanctum')->group(function (): void {
+    Route::get('/wishlist', [WishlistController::class, 'index']);
+    Route::post('/wishlist', [WishlistController::class, 'store']);
+    Route::get('/wishlist/{tmdbMovieId}', [WishlistController::class, 'show'])->where('tmdbMovieId', '[1-9][0-9]*');
+    Route::delete('/wishlist/{tmdbMovieId}', [WishlistController::class, 'destroy'])->where('tmdbMovieId', '[1-9][0-9]*');
+});
 
 Route::get('/genres', [GenreController::class, 'index']);
 Route::get('/genres/{genreId}/movies', [GenreController::class, 'movies'])->where('genreId', '[1-9][0-9]*');

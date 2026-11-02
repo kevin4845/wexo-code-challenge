@@ -10,7 +10,11 @@
     </p>
   </header>
 
-  @if (items().length === 0) {
+  @if (loadError()) {
+    <p class="max-w-[40rem] text-muted" role="alert">
+      The wishlist could not be loaded. Refresh the page to try again.
+    </p>
+  } @else if (ready() && items().length === 0) {
     <section
       class="empty-wishlist flex flex-col items-center gap-[0.7rem] rounded-lg border border-line bg-[radial-gradient(320px_140px_at_50%_0%,rgb(167_139_250/0.16),transparent_70%),var(--color-surface)] px-[1.4rem] py-[2.4rem] text-center [&_p]:max-w-[34rem] [&_p]:text-muted"
     >
@@ -34,7 +38,7 @@
         >Browse movies</a
       >
     </section>
-  } @else {
+  } @else if (ready()) {
     <div class="movie-grid grid grid-cols-2 gap-x-3 gap-y-4 md:grid-cols-4">
       @for (movie of items(); track movie.id) {
         <app-movie-card [movie]="movie" [alwaysShowAction]="true" />

@@ -19,6 +19,8 @@ export class WishlistPage {
 
   protected readonly items = this.wishlist.items;
   protected readonly count = this.wishlist.count;
+  protected readonly ready = this.wishlist.ready;
+  protected readonly loadError = this.wishlist.loadError;
   protected readonly formatCount = formatCount;
   protected readonly shelf = previewShelf();
 

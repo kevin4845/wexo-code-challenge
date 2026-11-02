@@ -1,0 +1,21 @@
+
+name: Deploy Laravel Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    name: Deploy to Ploi
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Ploi deployment
+        run: |
+          curl --fail --silent --show-error \
+            --request POST \
+            "${{ secrets.PLOI_DEPLOY_WEBHOOK }}"

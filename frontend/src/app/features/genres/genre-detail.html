@@ -1,16 +1,28 @@
-<div class="wrap page">
+<div class="mx-auto w-[min(1680px,calc(100%-(var(--gutter)*2)))] animate-fade-in pt-5 pb-4 md:pt-[1.6rem]">
   @if (!configured) {
-    <section class="state" role="alert">
+    <section
+      class="flex flex-col items-start gap-[0.7rem] rounded-lg border border-line bg-surface p-6 [&_p]:max-w-[34rem] [&_p]:text-muted"
+      role="alert"
+    >
       <h1>{{ genreName() }}</h1>
       <p>{{ configMessage }}</p>
     </section>
   } @else if (loadingFirst()) {
     <div class="banner skeleton" aria-hidden="true"></div>
   } @else if (loadError() && movies().length === 0) {
-    <section class="state" role="alert">
+    <section
+      class="flex flex-col items-start gap-[0.7rem] rounded-lg border border-line bg-surface p-6 [&_p]:max-w-[34rem] [&_p]:text-muted"
+      role="alert"
+    >
       <h1>{{ genreName() }}</h1>
       <p>{{ errorCopy(loadError()) }}</p>
-      <button type="button" class="btn btn-primary" (click)="retryFirst()">Try again</button>
+      <button
+        type="button"
+        class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-[0.45rem] rounded-full border border-transparent bg-accent-strong px-[1.15rem] py-[0.55rem] font-semibold text-ink transition duration-frame ease-frame hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent-strong)_42%,transparent)] active:translate-y-0"
+        (click)="retryFirst()"
+      >
+        Try again
+      </button>
     </section>
   } @else {
     <section class="banner">
@@ -29,11 +41,11 @@
       </div>
     </section>
 
-    <div class="chips" role="group" aria-label="Sort films">
+    <div class="mt-[0.4rem] mb-4 flex flex-wrap gap-2" role="group" aria-label="Sort films">
       @for (option of sorts; track option.id) {
         <button
           type="button"
-          class="chip"
+          class="min-h-[2.4rem] cursor-pointer rounded-full border border-line bg-surface px-[0.9rem] py-[0.35rem] text-muted aria-pressed:border-transparent aria-pressed:bg-accent-strong aria-pressed:font-semibold aria-pressed:text-ink"
           [class.is-active]="currentSort() === option.id"
           [attr.aria-pressed]="currentSort() === option.id"
           (click)="setSort(option.id)"
@@ -44,17 +56,17 @@
     </div>
 
     @if (movies().length) {
-      <p class="result-note">
+      <p class="mb-[0.9rem] text-muted">
         Showing {{ movies().length }} of
         {{ formatCount(totalResults()) }}
       </p>
-      <div class="movie-grid" [attr.aria-busy]="loadingMore()">
+      <div class="movie-grid grid grid-cols-2 gap-x-3 gap-y-4 md:grid-cols-4" [attr.aria-busy]="loadingMore()">
         @for (movie of movies(); track movie.id) {
           <app-movie-card [movie]="movie" />
         }
         @if (loadingMore()) {
           @for (slot of [1, 2, 3]; track slot) {
-            <div class="card-skeleton skeleton" aria-hidden="true"></div>
+            <div class="card-skeleton skeleton relative aspect-[2/3] overflow-hidden rounded-md" aria-hidden="true"></div>
           }
         }
       </div>
@@ -62,14 +74,18 @@
         <p class="sr-only" role="status">Loading more films</p>
       }
       @if (moreError(); as problem) {
-        <p class="inline-error" role="alert">
+        <p class="mb-[0.9rem] text-muted" role="alert">
           {{ errorCopy(problem) }}
-          <button type="button" class="text-link" (click)="loadMore()">Try again</button>
+          <button type="button" class="cursor-pointer font-semibold text-accent" (click)="loadMore()">
+            Try again
+          </button>
         </p>
       }
       <div #sentinel class="scroll-sentinel" aria-hidden="true"></div>
     } @else {
-      <section class="state">
+      <section
+        class="flex flex-col items-start gap-[0.7rem] rounded-lg border border-line bg-surface p-6 [&_p]:max-w-[34rem] [&_p]:text-muted"
+      >
         <h2>No films in this view</h2>
         <p>Try another sort, or come back when the catalogue has more titles.</p>
       </section>

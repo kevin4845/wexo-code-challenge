@@ -1,7 +1,7 @@
-<div class="wrap page">
-  <header class="page-intro">
-    <h1>My Wishlist</h1>
-    <p>
+<div class="mx-auto w-[min(1680px,calc(100%-(var(--gutter)*2)))] animate-fade-in pt-5 pb-4 md:pt-[1.6rem]">
+  <header class="mb-[1.4rem]">
+    <h1 class="text-[clamp(2.2rem,4vw,3.4rem)]">My Wishlist</h1>
+    <p class="mt-[0.3rem] max-w-[40rem] text-muted">
       @if (count() === 1) {
         1 saved movie
       } @else {
@@ -11,30 +11,43 @@
   </header>
 
   @if (items().length === 0) {
-    <section class="empty-wishlist">
-      <div class="empty-wishlist__shelf" aria-hidden="true">
+    <section
+      class="empty-wishlist flex flex-col items-center gap-[0.7rem] rounded-lg border border-line bg-[radial-gradient(320px_140px_at_50%_0%,rgb(167_139_250/0.16),transparent_70%),var(--color-surface)] px-[1.4rem] py-[2.4rem] text-center [&_p]:max-w-[34rem] [&_p]:text-muted"
+    >
+      <div class="mb-[0.35rem] flex items-end justify-center gap-[0.7rem]" aria-hidden="true">
         @for (movie of shelf; track movie.id) {
           @if (movie.posterPath; as src) {
-            <img [src]="src" alt="" />
+            <img
+              class="aspect-[2/3] w-[4.4rem] rounded-sm object-cover shadow-poster first:-rotate-[7deg] last:rotate-[7deg]"
+              [src]="src"
+              alt=""
+            />
           }
         }
       </div>
       <app-icon name="clapper" />
       <h2>Add more movies to your wishlist</h2>
       <p>Find movies you love and save them here.</p>
-      <a class="btn btn-primary" routerLink="/">Browse movies</a>
+      <a
+        class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-[0.45rem] rounded-full border border-transparent bg-accent-strong px-[1.15rem] py-[0.55rem] font-semibold text-ink no-underline transition duration-frame ease-frame hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_8px_18px_color-mix(in_srgb,var(--color-accent-strong)_42%,transparent)] active:translate-y-0"
+        routerLink="/"
+        >Browse movies</a
+      >
     </section>
   } @else {
-    <div class="movie-grid">
+    <div class="movie-grid grid grid-cols-2 gap-x-3 gap-y-4 md:grid-cols-4">
       @for (movie of items(); track movie.id) {
         <app-movie-card [movie]="movie" [alwaysShowAction]="true" />
       }
     </div>
-    <section class="empty-wishlist empty-wishlist--compact">
-      <app-icon name="clapper" />
-      <h2>Add more movies to your wishlist</h2>
-      <p>Find movies you love and save them here.</p>
-      <a class="btn btn-primary" routerLink="/">Browse movies</a>
-    </section>
+    <p class="mt-6">
+      <a
+        class="inline-flex items-center gap-[0.35rem] font-semibold whitespace-nowrap text-accent no-underline transition-colors duration-frame ease-frame hover:text-ink [&_app-icon]:transition-transform [&_app-icon]:duration-frame [&_app-icon]:ease-frame hover:[&_app-icon]:translate-x-[3px]"
+        routerLink="/"
+      >
+        Browse movies
+        <app-icon name="arrow" />
+      </a>
+    </p>
   }
 </div>

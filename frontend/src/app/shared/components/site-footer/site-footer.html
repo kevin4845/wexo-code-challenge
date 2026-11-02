@@ -1,11 +1,23 @@
-<footer class="footer">
-  <div class="wrap footer__inner">
-    <p class="wordmark">FRAME</p>
+<footer class="mt-12 border-t border-line">
+  <div
+    class="mx-auto flex w-[min(1280px,calc(100%-(var(--gutter)*2)))] flex-wrap items-center gap-x-6 gap-y-3 pt-[1.4rem] pb-[1.8rem] text-[0.92rem] text-muted"
+  >
+    <p class="text-[0.95rem] font-bold tracking-[0.18em] text-ink">FRAME</p>
     <p>A quieter way to browse cinema.</p>
-    <nav aria-label="Footer">
-      <a routerLink="/">Home</a>
-      <a routerLink="/genres">Genres</a>
-      <a routerLink="/wishlist">Wishlist</a>
+    <nav class="ml-auto flex gap-4 max-md:ml-0" aria-label="Footer">
+      <a class="text-[0.95rem] text-muted no-underline transition-colors hover:text-ink" routerLink="/"
+        >Home</a
+      >
+      <a
+        class="text-[0.95rem] text-muted no-underline transition-colors hover:text-ink"
+        routerLink="/genres"
+        >Genres</a
+      >
+      <a
+        class="text-[0.95rem] text-muted no-underline transition-colors hover:text-ink"
+        routerLink="/wishlist"
+        >Wishlist</a
+      >
     </nav>
   </div>
 </footer>

@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 
 import { type MovieSummary } from '../../../core/models/movie';
 import { Wishlist } from '../../../core/services/wishlist';
+import { armFilmFrame } from '../../motion/film-transition';
 import { displayImage } from '../../preview/preview-catalog';
 import { Icon } from '../icon/icon';
 
@@ -29,6 +30,18 @@ export class MovieCard {
     event.preventDefault();
     event.stopPropagation();
     this.wishlist.toggle(this.movie());
+  }
+
+  /** Name the poster before the router snapshots the page, so it can continue into the film. */
+  protected armPoster(event: Event): void {
+    if (event instanceof KeyboardEvent && event.key !== 'Enter') {
+      return;
+    }
+    const article = (event.currentTarget as HTMLElement).closest('article');
+    const frame = article?.querySelector('img, .card__fallback');
+    if (frame instanceof HTMLElement) {
+      armFilmFrame(frame, `poster-${this.movie().id}`);
+    }
   }
 
   protected markImageFailed(): void {

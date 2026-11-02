@@ -64,7 +64,7 @@ npm run format:check
 
 `npm run watch` rebuilds the development configuration. It does not serve the app.
 
-The Angular app is standalone, zoneless, and styled with SCSS. `frontend/src/main.ts` bootstraps `App`. Routes, the TMDB client, and the browser wishlist live under `frontend/src/app/`. Notes on those choices are in [docs/architecture.md](docs/architecture.md) and [docs/development-guidelines.md](docs/development-guidelines.md). Those notes use paths inside the Angular app, so run the npm commands from `frontend/`.
+The Angular app is standalone and zoneless, styled with Tailwind CSS and a small SCSS layer. `frontend/src/main.ts` bootstraps `App`. Routes, the TMDB client, and the browser wishlist live under `frontend/src/app/`. Notes on those choices are in [docs/architecture.md](docs/architecture.md) and [docs/development-guidelines.md](docs/development-guidelines.md). Those notes use paths inside the Angular app, so run the npm commands from `frontend/`.
 
 ### Frontend environment
 

@@ -1,4 +1,6 @@
-<div class="mx-auto w-[min(1680px,calc(100%-(var(--gutter)*2)))] animate-fade-in pt-5 pb-4 md:pt-[1.6rem]">
+<div
+  class="detail-shell mx-auto w-[min(1680px,calc(100%-(var(--gutter)*2)))] animate-fade-in pt-5 pb-4 md:pt-[1.6rem]"
+>
   @if (!configured) {
     <section
       class="flex flex-col items-start gap-[0.7rem] rounded-lg border border-line bg-surface p-6 [&_p]:max-w-[34rem] [&_p]:text-muted"
@@ -131,7 +133,10 @@
       </div>
 
       @if (tab() === 'overview') {
-        <div class="grid gap-6 md:grid-cols-[minmax(0,1fr)_16rem] md:items-start" role="tabpanel">
+        <div
+          class="detail-panel grid gap-6 md:grid-cols-[minmax(0,1fr)_16rem] md:items-start"
+          role="tabpanel"
+        >
           <section aria-labelledby="cast-heading">
             <h2 id="cast-heading">Cast &amp; Crew</h2>
             @if (credits.isLoading()) {
@@ -209,7 +214,7 @@
         </div>
       } @else if (tab() === 'cast') {
         <section
-          class="mt-[0.9rem] grid gap-x-3 gap-y-4 md:grid-cols-6"
+          class="detail-panel mt-[0.9rem] grid gap-x-3 gap-y-4 md:grid-cols-6"
           role="tabpanel"
           aria-labelledby="full-cast"
         >
@@ -231,7 +236,7 @@
           }
         </section>
       } @else {
-        <section role="tabpanel" aria-labelledby="similar-heading">
+        <section class="detail-panel" role="tabpanel" aria-labelledby="similar-heading">
           <h2 id="similar-heading" class="sr-only">Similar movies</h2>
           @if (similar.isLoading()) {
             <div

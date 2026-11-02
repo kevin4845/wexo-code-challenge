@@ -7,6 +7,6 @@ import type { AppEnvironment } from './environment.model';
  */
 export const environment: AppEnvironment = {
   production: true,
-  apiBaseUrl: '/api',
+  apiBaseUrl: 'https://wexoapi.kevinmm.dk/api',
   imageBaseUrl: 'https://image.tmdb.org/t/p',
 };

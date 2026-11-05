@@ -2,7 +2,7 @@
 
 The Angular app calls Laravel. Movie data is proxied from TMDB. Catalogue routes do not require a session. The signed-in pages in Angular still require a login.
 
-Session authentication uses cookies. Before `POST /register`, `POST /login`, or `POST /logout`, the browser requests `GET /sanctum/csrf-cookie` and sends the token back on the next request. These auth routes are not under `/api`.
+Session authentication uses cookies. Before `POST /register`, `POST /login`, or `POST /logout`, the browser requests `GET /sanctum/csrf-cookie`. The token comes back in the `X-CSRF-TOKEN` response header, because the API host's cookie is not readable from the frontend origin. These auth routes are not under `/api`.
 
 `GET /api/user` and every wishlist route require a Sanctum session.
 
@@ -27,7 +27,7 @@ Session authentication uses cookies. Before `POST /register`, `POST /login`, or 
 | GET | `/api/movies/search` | No | Search. Requires a `query` parameter |
 | GET | `/api/movies/{movieId}` | No | One film |
 | GET | `/api/movies/{movieId}/credits` | No | Cast and crew |
-| GET | `/api/movies/{movieId}/videos` | No | One embeddable YouTube trailer, or an empty result |
+| GET | `/api/movies/{movieId}/videos` | No | One embeddable YouTube trailer. `key` and `name` are null when none qualifies |
 | GET | `/api/movies/{movieId}/watch/providers` | No | Streaming, rent, and buy offers for Denmark |
 | GET | `/api/movies/{movieId}/recommendations` | No | Recommended films |
 | GET | `/api/movies/{movieId}/similar` | No | Similar films |

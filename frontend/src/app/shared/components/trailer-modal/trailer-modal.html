@@ -1,11 +1,16 @@
-<div class="grid h-full w-full place-items-center bg-canvas/84 p-4" (click)="close()">
+<div class="relative grid h-full w-full place-items-center p-4">
+  <button
+    type="button"
+    class="absolute inset-0 cursor-pointer border-0 bg-canvas/84 p-0"
+    aria-label="Close trailer"
+    (click)="close()"
+  ></button>
   <div
-    class="flex w-[min(60rem,calc(100vw-2rem),calc((100dvh-5.5rem)*16/9))] flex-col items-end gap-[0.55rem]"
+    class="relative z-[1] flex w-[min(60rem,calc(100vw-2rem),calc((100dvh-5.5rem)*16/9))] flex-col items-end gap-[0.55rem]"
     role="dialog"
     aria-modal="true"
     [attr.aria-label]="title()"
     [attr.aria-busy]="loading()"
-    (click)="$event.stopPropagation()"
   >
     <button
       #closeButton

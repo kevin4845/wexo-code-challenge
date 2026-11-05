@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 
-// Catalogue routes below stay public. A wishlist is always the signed-in user's.
+// Always the session user. These routes do not accept another user's id.
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/wishlist', [WishlistController::class, 'index']);
     Route::post('/wishlist', [WishlistController::class, 'store']);
@@ -16,6 +16,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::delete('/wishlist/{tmdbMovieId}', [WishlistController::class, 'destroy'])->where('tmdbMovieId', '[1-9][0-9]*');
 });
 
+// Public catalogue. The Angular guards are what require a signed-in user in the SPA.
 Route::get('/genres', [GenreController::class, 'index']);
 Route::get('/genres/{genreId}/movies', [GenreController::class, 'movies'])->where('genreId', '[1-9][0-9]*');
 

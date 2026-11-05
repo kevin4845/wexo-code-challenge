@@ -48,7 +48,7 @@ export class Home {
     inject(Title).setTitle('FRAME');
   }
 
-  /** First page of films TMDB returned for this genre. */
+  /** First page returned for this genre. */
   protected rowMovies(page: MoviePage | undefined): readonly MovieSummary[] {
     return page?.movies.slice(0, 8) ?? [];
   }

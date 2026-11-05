@@ -36,6 +36,7 @@ export class GenreDetail {
   private readonly sentinel = viewChild<ElementRef<HTMLElement>>('sentinel');
 
   private observer: IntersectionObserver | null = null;
+  /** A sort or genre change invalidates a page that is still in flight. */
   private generation = 0;
   private inFlightPage: number | null = null;
 
@@ -123,7 +124,7 @@ export class GenreDetail {
     });
   }
 
-  /** Asks TMDB for the next page. Ignored while a page is already in flight or the list is complete. */
+  /** Asks the catalogue for the next page. Ignored while a page is already in flight or the list is complete. */
   protected loadMore(): void {
     if (!this.configured || this.loadingFirst() || this.inFlightPage !== null) {
       return;

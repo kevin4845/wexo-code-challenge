@@ -10,7 +10,8 @@ return [
     // Login and CSRF live outside /api, but the browser still calls them with credentials.
     'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'register', 'logout'],
 
-    'allowed_methods' => ['GET', 'POST', 'OPTIONS'],
+    // DELETE is the wishlist removal call. A cross-origin preflight is rejected without it.
+    'allowed_methods' => ['GET', 'POST', 'DELETE', 'OPTIONS'],
 
     'allowed_origins' => $origins,
 

@@ -15,6 +15,10 @@ export interface AuthFailure {
   readonly fields: Readonly<Record<string, string>>;
 }
 
+/**
+ * Session-cookie sign-in. The signed-in user is a signal.
+ * Login, register, and logout are web routes, so each one requests the Sanctum CSRF cookie first.
+ */
 @Service()
 export class Auth {
   private readonly http = inject(HttpClient);
@@ -30,6 +34,7 @@ export class Auth {
     return this.user();
   }
 
+  /** One shared session check. A 401 still finishes it, so a guard does not wait forever. */
   checkAuthentication(): Observable<boolean> {
     if (this.ready()) {
       return of(this.isAuthenticated());
@@ -85,6 +90,7 @@ export class Auth {
     return this.ensureCsrf().pipe(
       switchMap(() => this.http.post(appUrl('/logout'), {}, { withCredentials: true })),
       catchError((error: unknown) => {
+        // The session is already gone. Clear the local user either way.
         if (error instanceof HttpErrorResponse && (error.status === 401 || error.status === 419)) {
           return of(null);
         }

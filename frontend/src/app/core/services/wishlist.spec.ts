@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { appUrl } from '../interceptors/sanctum';
 import { type MovieSummary } from '../models/movie';
 import { Auth } from './auth';
 import { Wishlist } from './wishlist';
@@ -40,17 +41,17 @@ describe('Wishlist', () => {
 
   it('adds a film and then removes it without writing localStorage', () => {
     const { wishlist, http } = setup();
-    http.expectOne('/api/wishlist').flush({ ids: [], movies: [] });
+    http.expectOne(appUrl('/api/wishlist')).flush({ ids: [], movies: [] });
 
     wishlist.toggle(heat);
-    const saved = http.expectOne('/api/wishlist');
+    const saved = http.expectOne(appUrl('/api/wishlist'));
     expect(saved.request.method).toBe('POST');
     expect(saved.request.body).toEqual({ tmdb_movie_id: 42 });
     expect(wishlist.isSaved(heat.id)).toBe(true);
     saved.flush(heatPayload);
 
     wishlist.toggle(heat);
-    const removed = http.expectOne('/api/wishlist/42');
+    const removed = http.expectOne(appUrl('/api/wishlist/42'));
     expect(removed.request.method).toBe('DELETE');
     expect(wishlist.isSaved(heat.id)).toBe(false);
     removed.flush(null);
@@ -62,7 +63,7 @@ describe('Wishlist', () => {
   it('loads the account wishlist from the API', () => {
     const { wishlist, http } = setup();
 
-    http.expectOne('/api/wishlist').flush({ ids: [42], movies: [heatPayload] });
+    http.expectOne(appUrl('/api/wishlist')).flush({ ids: [42], movies: [heatPayload] });
 
     expect(wishlist.items()).toEqual([{ ...heat, genreNames: [] }]);
     expect(wishlist.isSaved(42)).toBe(true);
@@ -73,12 +74,12 @@ describe('Wishlist', () => {
     localStorage.setItem('frame.wishlist', JSON.stringify([heat]));
     const { http } = setup();
 
-    http.expectOne('/api/wishlist').flush({ ids: [], movies: [] });
-    const saved = http.expectOne('/api/wishlist');
+    http.expectOne(appUrl('/api/wishlist')).flush({ ids: [], movies: [] });
+    const saved = http.expectOne(appUrl('/api/wishlist'));
     expect(saved.request.method).toBe('POST');
     expect(saved.request.body).toEqual({ tmdb_movie_id: 42 });
     saved.flush(heatPayload);
-    http.expectOne('/api/wishlist').flush({ ids: [42], movies: [heatPayload] });
+    http.expectOne(appUrl('/api/wishlist')).flush({ ids: [42], movies: [heatPayload] });
 
     expect(localStorage.getItem('frame.wishlist')).toBeNull();
     http.verify();
@@ -94,7 +95,7 @@ function setup(): { wishlist: Wishlist; http: HttpTestingController } {
   const wishlist = TestBed.inject(Wishlist);
 
   auth.checkAuthentication().subscribe();
-  http.expectOne('/api/user').flush({ id: 1, name: 'Ada', email: 'ada@example.com' });
+  http.expectOne(appUrl('/api/user')).flush({ id: 1, name: 'Ada', email: 'ada@example.com' });
   TestBed.flushEffects();
 
   return { wishlist, http };

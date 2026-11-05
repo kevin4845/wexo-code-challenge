@@ -23,6 +23,7 @@ class TmdbClient
             throw new TmdbException('The catalogue is not configured.', 503);
         }
 
+        // English results, without adult titles. A caller can override either value.
         $query = array_merge([
             'language' => 'en-US',
             'include_adult' => 'false',
@@ -39,9 +40,9 @@ class TmdbClient
             static fn (mixed $value): bool => $value !== null && $value !== '',
         );
 
+        // Argument order must not create a second cache entry for the same request.
         ksort($query);
 
-        // Sort the query so two equivalent requests share one cache entry.
         $cacheKey = 'tmdb.'.sha1($path.'?'.http_build_query($query));
         $cached = Cache::get($cacheKey);
 

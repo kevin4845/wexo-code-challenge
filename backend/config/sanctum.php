@@ -18,6 +18,7 @@ return [
     |
     */
 
+    // When set, this list is the SPA hosts only. Do not add the API host.
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
         'localhost,localhost:4200,127.0.0.1,127.0.0.1:4200,::1',

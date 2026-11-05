@@ -1,6 +1,6 @@
 # Architecture
 
-This application is FRAME, a movie discovery client. Screens, routing and TMDB access are implemented. Film imagery appears only when a TMDB API key is configured.
+This application is FRAME, a movie discovery client. Screens and routing are implemented. The browser calls the Laravel API. Film imagery appears only when that API is configured with TMDB credentials.
 
 ## Directories
 
@@ -8,9 +8,9 @@ This application is FRAME, a movie discovery client. Screens, routing and TMDB a
 
 Code used by more than one feature, or by the application shell:
 
-- `services/` holds the TMDB client, the request interceptor and the wishlist.
+- `services/` holds authentication, the catalogue client, the request interceptor, and the wishlist.
 - `models/` holds domain types shared by more than one feature, such as a movie or a genre. Build-time settings stay in `src/environments/` because they are compile-time configuration, not domain data.
-- `guards/` is reserved for functional route guards. None are required yet.
+- `guards/` holds `authGuard` and `guestGuard`.
 
 ### `src/app/shared`
 
@@ -24,7 +24,7 @@ One directory per product area:
 | ----------- | ------------------------------ |
 | `home/`     | Entry screen                   |
 | `genres/`   | Genre list and genre filtering |
-| `movies/`   | Movie list and movie details   |
+| `movies/`   | Movie details                  |
 | `wishlist/` | Movies the user has saved      |
 | `search/`   | Results for the header search  |
 
@@ -38,7 +38,7 @@ Feature components own the screen for their route. They read state and call serv
 
 Services own work that is not presentation:
 
-- `Tmdb` talks to TMDB.
+- `Tmdb` talks to the Laravel catalogue. It does not call TMDB.
 - `Wishlist`, in `core/services/`, owns the saved-movie collection so the header, cards and pages share one store.
 
 Use Angular’s `@Service()` decorator for services. It is the CLI default and provides the class for injection. Inject dependencies with `inject()`.
@@ -56,11 +56,11 @@ Use Angular’s `@Service()` decorator for services. It is the CLI default and p
 | `/wishlist`        | `features/wishlist` |
 | `/search`          | `features/search`   |
 
-Use functional guards from `core/guards/` only when a route must allow or block navigation. Do not add a guard preemptively.
+`authGuard` wraps the catalogue routes. `guestGuard` keeps a signed-in user off the login and register screens. Add another guard only when a route must allow or block navigation.
 
 ## API communication
 
-`provideHttpClient(withInterceptors([tmdbAuthInterceptor]))` is registered in `src/app/app.config.ts`. In Angular 22 this uses the Fetch backend. TMDB calls go through `Tmdb` in `core/services/`, which reads `environment.tmdb`.
+`provideHttpClient` is registered in `src/app/app.config.ts`, with the Sanctum interceptor. In Angular 22 this uses the Fetch backend. `Tmdb` calls the Laravel API. It does not call TMDB and it does not hold a TMDB credential.
 
 Cross-cutting HTTP behavior, such as sending the credential, belongs in a functional interceptor passed to `provideHttpClient(withInterceptors([...]))`. Individual features should not attach the credential themselves.
 
@@ -68,7 +68,7 @@ Cross-cutting HTTP behavior, such as sending the credential, belongs in a functi
 
 ## Wishlist state
 
-`Wishlist` keeps the saved films in a signal and writes them to `localStorage` under `frame.wishlist`. Components read `items`, `count` and `isSaved` in the template.
+`Wishlist` keeps the saved films in a signal. The database, through the Laravel API, is the source of truth. A leftover browser list is copied into the account once and then removed. Components read `items`, `count` and `isSaved` in the template.
 
 Do not add a global store. Signals are enough for this one collection.
 
@@ -79,7 +79,7 @@ Do not add a global store. Signals are enough for this one collection.
 - OnPush is the compiler default when a component omits `changeDetection`. Leave that default in place.
 - No server-side rendering. The challenge is a client application, and SSR would add a server build without a current need.
 - No UI component library. Tailwind CSS supplies layout, type, and color. `src/styles.scss` keeps the theme and the rules utilities express poorly: layered photographs, scrollers, and motion.
-- Component SCSS is limited to host layout, such as the sticky header.
+- Component SCSS is for layout utilities cannot express, such as the sticky header and the phone movie page. The trailer overlay uses Tailwind.
 - Strict TypeScript (`strict`) and strict Angular templates (`strictTemplates`), plus the extra checks generated for a strict Angular application: `noImplicitOverride`, `noPropertyAccessFromIndexSignature`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `strictInjectionParameters`, and `strictInputAccessModifiers`.
 
 The decision record for this setup is [decisions/0001-angular-application-setup.md](decisions/0001-angular-application-setup.md).

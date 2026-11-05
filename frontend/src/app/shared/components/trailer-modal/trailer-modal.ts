@@ -35,6 +35,8 @@ export class TrailerModal {
   protected readonly embedUrl = computed(() => this.trustedEmbed(this.videoKey()));
 
   constructor() {
+    // Lock scroll for the life of this overlay. Destroying it removes the iframe, which stops playback,
+    // and restores the overflow captured here.
     const root = document.documentElement.style.overflow;
     const body = document.body.style.overflow;
     document.documentElement.style.overflow = 'hidden';

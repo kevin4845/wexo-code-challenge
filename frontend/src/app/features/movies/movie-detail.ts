@@ -68,6 +68,7 @@ export class MovieDetail {
     stream: ({ params }) => this.tmdb.watchProviders(params),
   });
 
+  /** The similar tab is TMDB recommendations. This screen does not call `/movies/{id}/similar`. */
   protected readonly similar = rxResource({
     params: () => Number(this.id()),
     stream: ({ params }) => this.tmdb.recommendations(params),
@@ -139,7 +140,6 @@ export class MovieDetail {
       .join(', ');
   }
 
-  /** Cast shown on the detail page. */
   protected creditCast(limit: number): readonly CastMember[] {
     if (!this.credits.hasValue()) {
       return [];

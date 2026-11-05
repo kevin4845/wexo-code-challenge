@@ -35,12 +35,12 @@ export class Tmdb {
     return environment.apiBaseUrl.trim().length > 0;
   }
 
-  /** Films moving this week. The homepage hero uses the first title that has a backdrop. */
+  /** Films moving this week. */
   trending(): Observable<MoviePage> {
     return this.memo('trending', () => this.get('/movies/trending').pipe(map(parseMoviePage)));
   }
 
-  /** Current popular films. */
+  /** Popular films. The current screens use trending and genre discover instead. */
   popular(): Observable<MoviePage> {
     return this.memo('popular', () => this.get('/movies/popular').pipe(map(parseMoviePage)));
   }
@@ -79,7 +79,7 @@ export class Tmdb {
     );
   }
 
-  /** Title search. An empty query does not call the API. */
+  /** Title search. An empty query is refused, and results are not kept in the session cache. */
   search(query: string): Observable<MoviePage> {
     const term = query.trim();
     if (!term) {
@@ -116,7 +116,7 @@ export class Tmdb {
     );
   }
 
-  /** YouTube trailer when TMDB has one. Null means the page should hide the trailer action. */
+  /** The one embeddable YouTube video Laravel selected. Null hides the trailer action. */
   trailer(id: number): Observable<MovieTrailer | null> {
     return this.memo(`trailer:${id}`, () =>
       this.get(`/movies/${id}/videos`).pipe(map(parseTrailer)),
@@ -132,7 +132,7 @@ export class Tmdb {
     );
   }
 
-  /** Up to 12 films TMDB marks as similar. */
+  /** Up to 12 films TMDB marks as similar. The detail page uses recommendations for that tab. */
   similar(id: number): Observable<readonly MovieSummary[]> {
     return this.memo(`similar:${id}`, () =>
       this.get(`/movies/${id}/similar`).pipe(
@@ -141,7 +141,7 @@ export class Tmdb {
     );
   }
 
-  /** Official movie genres. Ids match the nine genres FRAME browses. */
+  /** TMDB's movie genre list. FRAME browses nine of these ids. */
   genres(): Observable<ReadonlyMap<number, string>> {
     return this.memo('genre-names', () => this.get('/genres').pipe(map(parseGenreMap)));
   }

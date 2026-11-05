@@ -32,11 +32,11 @@ Follow these conventions for this repository. The [Angular style guide](https://
 
 - `App` hosts the router outlet. Feature screens are routed components, not content added to `App`.
 - A feature component may depend on services in its own feature and on `core` services. It should not reach into another feature’s files for data access. Share that behavior through `core` or through inputs.
-- Shared components receive data through inputs and report actions through outputs. They do not inject the TMDB service or the wishlist service.
-- The future TMDB service is the only code that knows TMDB URLs and request shapes.
-- The future wishlist service is the only code that changes the saved-movie collection.
+- Shared components receive data through inputs and report actions through outputs. They do not inject `Tmdb`. `MovieCard` injects `Wishlist`, and `SiteHeader` injects `Auth`, because those controls are the same on every screen.
+- `Tmdb` is the only frontend code that knows the catalogue URLs. Those URLs point at Laravel, which calls TMDB.
+- `Wishlist` is the only code that changes the saved-movie collection.
 
-## Future API error handling
+## API error handling
 
 - The browser calls the Laravel API. It does not call TMDB and it does not hold a TMDB credential.
 - Check `environment.apiBaseUrl` before sending a request. If it is empty, fail before the request.

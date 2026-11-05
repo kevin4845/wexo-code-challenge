@@ -231,6 +231,7 @@ export function parseCredits(value: unknown): MovieCredits {
     : [];
 
   const director = crew.find((person) => person.job === 'Director') ?? null;
+  // The facts panel lists at most three distinct writers.
   const writerJobs = new Set(['Writer', 'Screenplay', 'Story']);
   const writers: CrewCredit[] = [];
   for (const person of crew) {
@@ -276,6 +277,7 @@ export function parseWatchProviders(value: unknown): WatchAvailability {
   };
 }
 
+/** Provider logos are labels. A watch page is kept only when it is on TMDB. */
 function watchLink(link: string | null): string | null {
   if (!link || !link.startsWith('https://www.themoviedb.org/')) {
     return null;

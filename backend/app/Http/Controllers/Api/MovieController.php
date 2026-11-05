@@ -9,7 +9,8 @@ use App\Services\Tmdb\TmdbClient;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Returns TMDB's own JSON. The Angular app already parses that shape, and image files are not proxied.
+ * Catalogue lists keep TMDB's JSON, and image files are not proxied.
+ * Videos and watch providers are reduced first: one embeddable trailer, and Denmark offers only.
  */
 class MovieController extends Controller
 {
@@ -190,7 +191,7 @@ class MovieController extends Controller
     }
 
     /**
-     * Logos open the TMDB watch page, so a link to any other host is dropped.
+     * Provider logos are labels, not links. This regional page is kept only when it is on TMDB.
      */
     private function watchLink(mixed $link): ?string
     {

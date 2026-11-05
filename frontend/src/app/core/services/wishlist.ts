@@ -34,6 +34,7 @@ export class Wishlist {
   readonly ready = signal(false);
 
   constructor() {
+    // Reload when the signed-in user changes. untracked keeps the writes below from running this again.
     effect(() => {
       const ready = this.auth.initialized();
       const userId = this.auth.currentUser()?.id ?? null;
@@ -65,6 +66,7 @@ export class Wishlist {
       return;
     }
 
+    // A newer toggle or sign-out must be allowed to discard an older list response.
     this.fetchGeneration += 1;
     if (this.isSaved(movie.id)) {
       this.remove(movie.id);
@@ -80,6 +82,7 @@ export class Wishlist {
     this.http.get<WishlistPayload>(appUrl('/api/wishlist'), { withCredentials: true }).subscribe({
       next: (payload) => {
         if (generation !== this.fetchGeneration) {
+          // A newer sign-in or toggle owns the list now.
           return;
         }
         this.apply(payload);
@@ -100,6 +103,7 @@ export class Wishlist {
   }
 
   private add(movie: MovieSummary): void {
+    // Show the save immediately. A rejected request puts the previous list back.
     const previousMovies = this.movies();
     const previousIds = this.savedIds();
     this.movies.set([movie, ...previousMovies.filter((item) => item.id !== movie.id)]);
@@ -139,6 +143,7 @@ export class Wishlist {
 
     this.http.delete(appUrl(`/api/wishlist/${id}`), { withCredentials: true }).subscribe({
       error: (error: unknown) => {
+        // Already gone on the server. Keep the local removal.
         if (error instanceof HttpErrorResponse && error.status === 404) {
           return;
         }

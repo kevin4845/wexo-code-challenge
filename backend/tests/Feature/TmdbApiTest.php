@@ -244,6 +244,24 @@ class TmdbApiTest extends TestCase
             ->assertHeaderMissing('Access-Control-Allow-Origin');
     }
 
+    public function test_the_spa_origin_may_delete_across_origins(): void
+    {
+        config([
+            'cors.allowed_origins' => ['http://localhost:4200'],
+        ]);
+
+        $response = $this->withHeaders([
+            'Origin' => 'http://localhost:4200',
+            'Access-Control-Request-Method' => 'DELETE',
+        ])->options('/api/wishlist/1');
+
+        $response->assertNoContent();
+        $this->assertStringContainsString(
+            'DELETE',
+            (string) $response->headers->get('Access-Control-Allow-Methods'),
+        );
+    }
+
     public function test_videos_return_the_newest_official_youtube_trailer_and_are_cached(): void
     {
         Http::fake([

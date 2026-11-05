@@ -53,6 +53,7 @@ export const sanctumInterceptor: HttpInterceptorFn = (request, next) => {
     return next(request);
   }
 
+  // The exposed header is the cross-origin token. A readable XSRF cookie is only a same-origin fallback.
   const changing = request.method !== 'GET' && request.method !== 'HEAD';
   let headers = request.headers;
   if (changing && csrfToken && !headers.has('X-CSRF-TOKEN')) {

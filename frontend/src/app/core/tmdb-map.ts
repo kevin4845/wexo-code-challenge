@@ -246,39 +246,19 @@ export function parseCredits(value: unknown): MovieCredits {
   return { cast, director, writers };
 }
 
-/** Prefers an official YouTube trailer, then any trailer, then a teaser. */
+/** Laravel already chose the video. A key that cannot be embedded never reaches the iframe. */
 export function parseTrailer(value: unknown): MovieTrailer | null {
   const source = record(value);
-  const results = source?.['results'];
-  if (!Array.isArray(results)) {
+  if (!source) {
     return null;
   }
 
-  const videos = results.flatMap((item) => {
-    const video = record(item);
-    if (!video || text(video, 'site') !== 'YouTube') {
-      return [];
-    }
-    const key = text(video, 'key');
-    if (!key) {
-      return [];
-    }
-    return [
-      {
-        key,
-        name: text(video, 'name') ?? 'Trailer',
-        type: text(video, 'type') ?? '',
-        official: video['official'] === true,
-      },
-    ];
-  });
+  const key = text(source, 'key');
+  if (!key || !/^[A-Za-z0-9_-]{6,64}$/.test(key)) {
+    return null;
+  }
 
-  const match =
-    videos.find((video) => video.type === 'Trailer' && video.official) ??
-    videos.find((video) => video.type === 'Trailer') ??
-    videos.find((video) => video.type === 'Teaser');
-
-  return match ? { key: match.key, name: match.name } : null;
+  return { key, name: text(source, 'name') ?? 'Trailer' };
 }
 
 /** Denmark availability already shaped by Laravel. A bad payload hides the section. */

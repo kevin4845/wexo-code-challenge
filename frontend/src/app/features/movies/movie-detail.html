@@ -96,16 +96,15 @@
                 <app-icon [name]="isSaved(film.id) ? 'heart-filled' : 'heart'" />
                 {{ isSaved(film.id) ? 'On wishlist' : 'Add to wishlist' }}
               </button>
-              @if (trailerHref(); as href) {
-                <a
-                  class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-[0.45rem] rounded-full border border-line-strong bg-canvas/28 px-[1.15rem] py-[0.55rem] font-semibold text-ink no-underline transition duration-frame ease-frame hover:-translate-y-px hover:border-accent hover:bg-accent/12 active:translate-y-0"
-                  [href]="href"
-                  target="_blank"
-                  rel="noopener noreferrer"
+              @if (playableTrailer()) {
+                <button
+                  type="button"
+                  class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-[0.45rem] rounded-full border border-line-strong bg-canvas/28 px-[1.15rem] py-[0.55rem] font-semibold text-ink transition duration-frame ease-frame hover:-translate-y-px hover:border-accent hover:bg-accent/12 active:translate-y-0"
+                  (click)="openTrailer()"
                 >
                   <app-icon name="play" />
                   Watch trailer
-                </a>
+                </button>
               }
             </div>
           </div>
@@ -341,3 +340,12 @@
     </section>
   }
 </div>
+@if (trailerOpen()) {
+  @if (playableTrailer(); as filmTrailer) {
+    <app-trailer-modal
+      [videoKey]="filmTrailer.key"
+      [title]="filmTrailer.name"
+      (closed)="closeTrailer()"
+    />
+  }
+}

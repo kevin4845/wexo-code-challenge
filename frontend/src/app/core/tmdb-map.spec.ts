@@ -37,22 +37,13 @@ describe('tmdb response mapping', () => {
     expect(parseMovie({ title: 'No id' })).toBeNull();
   });
 
-  it('prefers an official YouTube trailer', () => {
-    const trailer = parseTrailer({
-      results: [
-        { site: 'YouTube', type: 'Teaser', key: 'teaser', official: true },
-        {
-          site: 'YouTube',
-          type: 'Trailer',
-          key: 'trailer',
-          official: true,
-          name: 'Official trailer',
-        },
-        { site: 'Vimeo', type: 'Trailer', key: 'ignored', official: true },
-      ],
+  it('accepts a trailer key that can be embedded', () => {
+    expect(parseTrailer({ key: 'newtrailerxx', name: 'Official trailer' })).toEqual({
+      key: 'newtrailerxx',
+      name: 'Official trailer',
     });
-
-    expect(trailer).toEqual({ key: 'trailer', name: 'Official trailer' });
+    expect(parseTrailer({ key: null, name: null })).toBeNull();
+    expect(parseTrailer({ key: 'https://evil.example/embed', name: 'Bad' })).toBeNull();
   });
 
   it('keeps Denmark watch providers and drops a link that is not the TMDB page', () => {

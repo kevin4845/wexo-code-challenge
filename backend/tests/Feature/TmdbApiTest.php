@@ -243,4 +243,138 @@ class TmdbApiTest extends TestCase
             ->getJson('/api/movies/search')
             ->assertHeaderMissing('Access-Control-Allow-Origin');
     }
+
+    public function test_videos_return_the_newest_official_youtube_trailer_and_are_cached(): void
+    {
+        Http::fake([
+            'https://api.themoviedb.org/*' => Http::response([
+                'results' => [
+                    [
+                        'site' => 'YouTube',
+                        'type' => 'Trailer',
+                        'official' => true,
+                        'key' => 'oldertrailer',
+                        'name' => 'Older trailer',
+                        'published_at' => '2020-01-01T00:00:00.000Z',
+                    ],
+                    [
+                        'site' => 'YouTube',
+                        'type' => 'Teaser',
+                        'official' => true,
+                        'key' => 'officialtease',
+                        'name' => 'Official teaser',
+                        'published_at' => '2024-01-01T00:00:00.000Z',
+                    ],
+                    [
+                        'site' => 'YouTube',
+                        'type' => 'Trailer',
+                        'official' => true,
+                        'key' => 'newtrailerxx',
+                        'name' => 'New trailer',
+                        'published_at' => '2024-06-01T00:00:00.000Z',
+                    ],
+                    [
+                        'site' => 'YouTube',
+                        'type' => 'Trailer',
+                        'official' => false,
+                        'key' => 'fantrailerxx',
+                        'name' => 'Fan trailer',
+                        'published_at' => '2025-01-01T00:00:00.000Z',
+                    ],
+                    [
+                        'site' => 'Vimeo',
+                        'type' => 'Trailer',
+                        'official' => true,
+                        'key' => 'vimeokeyxxxx',
+                        'name' => 'Vimeo',
+                        'published_at' => '2025-02-01T00:00:00.000Z',
+                    ],
+                    [
+                        'site' => 'YouTube',
+                        'type' => 'Clip',
+                        'official' => true,
+                        'key' => 'clipkeyxxxxx',
+                        'name' => 'Clip',
+                        'published_at' => '2025-03-01T00:00:00.000Z',
+                    ],
+                    [
+                        'site' => 'YouTube',
+                        'type' => 'Trailer',
+                        'official' => true,
+                        'key' => '../not-a-key',
+                        'name' => 'Bad key',
+                        'published_at' => '2025-04-01T00:00:00.000Z',
+                    ],
+                ],
+            ]),
+        ]);
+
+        $this->getJson('/api/movies/550/videos')
+            ->assertOk()
+            ->assertExactJson([
+                'key' => 'newtrailerxx',
+                'name' => 'New trailer',
+            ]);
+
+        $this->getJson('/api/movies/550/videos')->assertOk();
+
+        Http::assertSentCount(1);
+    }
+
+    public function test_videos_prefer_an_official_teaser_when_no_trailer_can_be_played(): void
+    {
+        Http::fake([
+            'https://api.themoviedb.org/*' => Http::response([
+                'results' => [
+                    [
+                        'site' => 'YouTube',
+                        'type' => 'Teaser',
+                        'official' => false,
+                        'key' => 'newerteaserx',
+                        'name' => 'Newer teaser',
+                        'published_at' => '2025-01-01T00:00:00.000Z',
+                    ],
+                    [
+                        'site' => 'YouTube',
+                        'type' => 'Teaser',
+                        'official' => true,
+                        'key' => 'officialtease',
+                        'name' => 'Official teaser',
+                        'published_at' => '2022-01-01T00:00:00.000Z',
+                    ],
+                ],
+            ]),
+        ]);
+
+        $this->getJson('/api/movies/550/videos')
+            ->assertOk()
+            ->assertExactJson([
+                'key' => 'officialtease',
+                'name' => 'Official teaser',
+            ]);
+    }
+
+    public function test_videos_are_empty_when_nothing_can_be_embedded(): void
+    {
+        Http::fake([
+            'https://api.themoviedb.org/*' => Http::response([
+                'results' => [
+                    [
+                        'site' => 'Vimeo',
+                        'type' => 'Trailer',
+                        'official' => true,
+                        'key' => 'vimeokeyxxxx',
+                        'name' => 'Vimeo',
+                    ],
+                ],
+            ]),
+        ]);
+
+        $this->getJson('/api/movies/550/videos')
+            ->assertOk()
+            ->assertExactJson([
+                'key' => null,
+                'name' => null,
+            ]);
+    }
 }

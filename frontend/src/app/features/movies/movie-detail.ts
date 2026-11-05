@@ -9,6 +9,7 @@ import {
   type CastMember,
   type MovieDetails,
   type MovieSummary,
+  type MovieTrailer,
   type WatchAvailability,
   type WatchProvider,
 } from '../../core/models/movie';
@@ -18,12 +19,13 @@ import { Wishlist } from '../../core/services/wishlist';
 import { displayImage } from '../../shared/preview/preview-catalog';
 import { Icon } from '../../shared/components/icon/icon';
 import { MovieCard } from '../../shared/components/movie-card/movie-card';
+import { TrailerModal } from '../../shared/components/trailer-modal/trailer-modal';
 
 type DetailTab = 'overview' | 'cast' | 'similar';
 
 @Component({
   selector: 'app-movie-detail',
-  imports: [Icon, MovieCard, RouterLink],
+  imports: [Icon, MovieCard, RouterLink, TrailerModal],
   templateUrl: './movie-detail.html',
   styleUrl: './movie-detail.scss',
 })
@@ -44,6 +46,7 @@ export class MovieDetail {
   protected readonly languageName = languageName;
   protected readonly tab = signal<DetailTab>('overview');
   protected readonly overviewOpen = signal(false);
+  protected readonly trailerOpen = signal(false);
 
   protected readonly movie = rxResource({
     params: () => Number(this.id()),
@@ -79,7 +82,10 @@ export class MovieDetail {
 
     effect(() => {
       this.id();
-      untracked(() => this.overviewOpen.set(false));
+      untracked(() => {
+        this.overviewOpen.set(false);
+        this.trailerOpen.set(false);
+      });
     });
   }
 
@@ -108,12 +114,19 @@ export class MovieDetail {
     return this.wishlist.isSaved(id);
   }
 
-  protected trailerHref(): string | null {
-    if (!this.trailer.hasValue()) {
-      return null;
+  protected playableTrailer(): MovieTrailer | null {
+    return this.trailer.hasValue() ? this.trailer.value() : null;
+  }
+
+  protected openTrailer(): void {
+    if (!this.playableTrailer()) {
+      return;
     }
-    const trailer = this.trailer.value();
-    return trailer ? `https://www.youtube.com/watch?v=${encodeURIComponent(trailer.key)}` : null;
+    this.trailerOpen.set(true);
+  }
+
+  protected closeTrailer(): void {
+    this.trailerOpen.set(false);
   }
 
   protected writerNames(): string | null {

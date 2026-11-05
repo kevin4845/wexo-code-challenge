@@ -1,0 +1,40 @@
+<div class="grid h-full w-full place-items-center bg-canvas/84 p-4" (click)="close()">
+  <div
+    class="flex w-[min(60rem,calc(100vw-2rem),calc((100dvh-5.5rem)*16/9))] flex-col items-end gap-[0.55rem]"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="title()"
+    [attr.aria-busy]="loading()"
+    (click)="$event.stopPropagation()"
+  >
+    <button
+      #closeButton
+      type="button"
+      class="inline-flex size-10 cursor-pointer items-center justify-center rounded-full border border-line-strong bg-canvas/72 text-ink hover:border-accent"
+      aria-label="Close trailer"
+      (click)="close()"
+    >
+      <app-icon name="close" />
+    </button>
+    <div class="relative aspect-video w-full overflow-hidden rounded-md bg-black">
+      @if (embedUrl(); as src) {
+        <iframe
+          class="absolute inset-0 size-full border-0"
+          [src]="src"
+          [title]="title()"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"
+          (load)="ready()"
+        ></iframe>
+        @if (loading()) {
+          <div class="absolute inset-0 z-[1] skeleton" aria-hidden="true"></div>
+        }
+      } @else {
+        <p class="m-0 grid h-full place-items-center p-4 text-center text-muted">
+          This trailer can’t be played.
+        </p>
+      }
+    </div>
+  </div>
+</div>

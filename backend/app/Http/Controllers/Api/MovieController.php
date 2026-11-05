@@ -55,9 +55,15 @@ class MovieController extends Controller
         return response()->json($this->tmdb->get("/movie/{$movieId}/credits"));
     }
 
+    /**
+     * One embeddable YouTube video. The shared client caches TMDB's full list;
+     * clips and other hosts are dropped because the page plays this inside FRAME.
+     */
     public function videos(int $movieId): JsonResponse
     {
-        return response()->json($this->tmdb->get("/movie/{$movieId}/videos"));
+        return response()->json($this->embeddableTrailer(
+            $this->tmdb->get("/movie/{$movieId}/videos"),
+        ));
     }
 
     public function recommendations(PageRequest $request, int $movieId): JsonResponse
@@ -74,6 +80,72 @@ class MovieController extends Controller
             "/movie/{$movieId}/similar",
             $this->pageQuery($request),
         ));
+    }
+
+    /**
+     * Official trailers win, then other trailers, then teasers. The newest video wins ties.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array{key: string|null, name: string|null}
+     */
+    private function embeddableTrailer(array $payload): array
+    {
+        $results = $payload['results'] ?? null;
+        $candidates = [];
+
+        if (is_array($results)) {
+            foreach ($results as $index => $video) {
+                if (! is_array($video) || ($video['site'] ?? null) !== 'YouTube') {
+                    continue;
+                }
+
+                $type = $video['type'] ?? null;
+                if ($type !== 'Trailer' && $type !== 'Teaser') {
+                    continue;
+                }
+
+                $key = $video['key'] ?? null;
+                if (! is_string($key) || preg_match('/^[A-Za-z0-9_-]{6,64}$/', $key) !== 1) {
+                    continue;
+                }
+
+                $official = ($video['official'] ?? false) === true;
+                $published = $video['published_at'] ?? null;
+                $timestamp = is_string($published) ? strtotime($published) : false;
+                $name = $video['name'] ?? null;
+
+                $candidates[] = [
+                    'rank' => match (true) {
+                        $type === 'Trailer' && $official => 0,
+                        $type === 'Trailer' => 1,
+                        $official => 2,
+                        default => 3,
+                    },
+                    'published' => $timestamp === false ? 0 : $timestamp,
+                    'index' => $index,
+                    'key' => $key,
+                    'name' => is_string($name) && trim($name) !== '' ? trim($name) : 'Trailer',
+                ];
+            }
+        }
+
+        usort(
+            $candidates,
+            static fn (array $left, array $right): int => $left['rank'] <=> $right['rank']
+                ?: $right['published'] <=> $left['published']
+                ?: $left['index'] <=> $right['index'],
+        );
+
+        $trailer = $candidates[0] ?? null;
+
+        if ($trailer === null) {
+            return ['key' => null, 'name' => null];
+        }
+
+        return [
+            'key' => $trailer['key'],
+            'name' => $trailer['name'],
+        ];
     }
 
     /**
